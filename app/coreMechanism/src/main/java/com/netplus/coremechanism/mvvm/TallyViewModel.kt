@@ -1,7 +1,7 @@
 package com.netplus.coremechanism.mvvm
 
 import androidx.lifecycle.ViewModel
-import com.netplus.coremechanism.backendRemote.model.GenerateQrcodeResponse
+import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
 import com.netplus.coremechanism.backendRemote.model.login.LoginResponse
 import com.netplus.coremechanism.backendRemote.responseManager.ApiResponseHandler
 

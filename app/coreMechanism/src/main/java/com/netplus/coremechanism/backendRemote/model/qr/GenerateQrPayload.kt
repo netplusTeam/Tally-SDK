@@ -1,4 +1,4 @@
-package com.netplus.coremechanism.backendRemote.model
+package com.netplus.coremechanism.backendRemote.model.qr
 
 data class GenerateQrPayload(
     val user_id: Int?=null,

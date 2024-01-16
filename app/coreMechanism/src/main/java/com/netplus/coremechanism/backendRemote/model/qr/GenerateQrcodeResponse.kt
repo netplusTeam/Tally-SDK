@@ -1,4 +1,4 @@
-package com.netplus.coremechanism.backendRemote.model
+package com.netplus.coremechanism.backendRemote.model.qr
 
 data class GenerateQrcodeResponse(
     val qr_code_id: String?,

@@ -1,7 +1,7 @@
 package com.netplus.coremechanism.backendRemote
 
-import com.netplus.coremechanism.backendRemote.model.GenerateQrPayload
-import com.netplus.coremechanism.backendRemote.model.GenerateQrcodeResponse
+import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrPayload
+import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
 import com.netplus.coremechanism.backendRemote.model.login.LoginPayload
 import com.netplus.coremechanism.backendRemote.model.login.LoginResponse
 import retrofit2.Call

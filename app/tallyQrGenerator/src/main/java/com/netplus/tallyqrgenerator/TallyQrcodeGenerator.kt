@@ -3,7 +3,7 @@ package com.netplus.tallyqrgenerator
 import android.content.Context
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.netplus.coremechanism.backendRemote.model.GenerateQrcodeResponse
+import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
 import com.netplus.coremechanism.backendRemote.model.login.LoginResponse
 import com.netplus.coremechanism.backendRemote.responseManager.ApiResponseHandler
 import com.netplus.coremechanism.internet.handler.InternetConfigViewModel

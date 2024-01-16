@@ -17,3 +17,4 @@ rootProject.name = "Tally"
 include(":app")
 include(":app:tallyQrGenerator")
 include(":app:coreMechanism")
+include(":app:tallyQrGeneratorUI")
