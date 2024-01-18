@@ -1,8 +1,11 @@
 package com.netplus.coremechanism.mvvm
 
 import androidx.lifecycle.ViewModel
-import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
 import com.netplus.coremechanism.backendRemote.model.login.LoginResponse
+import com.netplus.coremechanism.backendRemote.model.merchants.AllMerchantResponse
+import com.netplus.coremechanism.backendRemote.model.merchants.MerchantResponse
+import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
+import com.netplus.coremechanism.backendRemote.model.transactions.TransactionResponse
 import com.netplus.coremechanism.backendRemote.responseManager.ApiResponseHandler
 
 /**
@@ -63,4 +66,51 @@ class TallyViewModel(private val tallyRepository: TallyRepository) : ViewModel()
         appCode,
         callback
     )
+
+    /**
+     * Gets all transactions with the provided information
+     *
+     * @param qrcodeId The QrcodeId from which transactions will be queried
+     * @param page The number of pages to return
+     * @param pageSize The size of transactions to be returned in a page
+     * @param callback The callback for handling API response
+     */
+    fun getTransactions(
+        qrcodeId: String,
+        page: Int,
+        pageSize: Int,
+        callback: ApiResponseHandler.Callback<TransactionResponse>
+    ) = tallyRepository.getTransactions(qrcodeId, page, pageSize, callback)
+
+    /**
+     * Get selected merchant with the provided information
+     *
+     * @param token The authorization token
+     * @param search The name of merchant to search
+     * @param limit The limit
+     * @param page The number of pages to return
+     * @param callback The callback for handling API response
+     */
+    fun getMerchant(
+        token: String,
+        search: String,
+        limit: Int,
+        page: Int,
+        callback: ApiResponseHandler.Callback<MerchantResponse>
+    ) = tallyRepository.getMerchant(token, search, limit, page, callback)
+
+    /**
+     * Get all merchants
+     *
+     * @param token The authorization token
+     * @param limit The page limit
+     * @param page The page number
+     * @param callback The callback for handling API response
+     */
+    fun getAllMerchant(
+        token: String,
+        limit: Int,
+        page: Int,
+        callback: ApiResponseHandler.Callback<AllMerchantResponse>
+    ) = tallyRepository.getAllMerchant(token, limit, page, callback)
 }

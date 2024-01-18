@@ -1,15 +1,17 @@
 package com.netplus.tallyqrgenerator
 
-import android.content.Context
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
 import com.netplus.coremechanism.backendRemote.model.login.LoginResponse
+import com.netplus.coremechanism.backendRemote.model.merchants.AllMerchantResponse
+import com.netplus.coremechanism.backendRemote.model.merchants.MerchantResponse
+import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
+import com.netplus.coremechanism.backendRemote.model.transactions.TransactionResponse
 import com.netplus.coremechanism.backendRemote.responseManager.ApiResponseHandler
 import com.netplus.coremechanism.internet.handler.InternetConfigViewModel
 import com.netplus.coremechanism.mvvm.TallyViewModel
 import com.netplus.coremechanism.utils.AppPreferences
-import com.netplus.coremechanism.utils.GeneratorCallback
+import com.netplus.coremechanism.utils.TallyResponseCallback
 import org.koin.java.KoinJavaComponent.getKoin
 
 /**
@@ -34,11 +36,10 @@ class TallyQrcodeGenerator : AppCompatActivity() {
     fun authenticateBank(
         email: String,
         password: String,
-        context: Context,
-        callback: GeneratorCallback<LoginResponse>
+        callback: TallyResponseCallback<LoginResponse>
     ) {
         // Observe network state using InternetConfigViewModel
-        internetConfigViewModel.networkState(context)?.observe(this) {
+        internetConfigViewModel.networkState(this)?.observe(this) {
             // Check if the device is connected to the internet
             when {
                 // Initiate user login through TallyViewModel
@@ -48,15 +49,15 @@ class TallyQrcodeGenerator : AppCompatActivity() {
                     object : ApiResponseHandler.Callback<LoginResponse> {
                         override fun onSuccess(data: LoginResponse?) {
                             // Handle successful login response
-                            callback.onQrcodeGenerateSuccess(data)
+                            callback.success(data)
                             // Save the authentication token to preferences
-                            AppPreferences.getInstance(context)
+                            AppPreferences.getInstance(this@TallyQrcodeGenerator)
                                 .setStringValue(data?.token ?: "")
                         }
 
                         override fun onError(errorMessage: String?) {
                             // Handle login error
-                            callback.onQrcodeGenerateFailed(errorMessage)
+                            callback.failed(errorMessage)
                         }
                     })
 
@@ -87,7 +88,6 @@ class TallyQrcodeGenerator : AppCompatActivity() {
      * @param callback The callback for handling the QR code generation response.
      */
     fun generateQrcode(
-        context: Context,
         userId: Int,
         cardCvv: String,
         cardExpiry: String,
@@ -98,10 +98,10 @@ class TallyQrcodeGenerator : AppCompatActivity() {
         issuingBank: String,
         mobilePhone: String,
         appCode: String,
-        callback: GeneratorCallback<GenerateQrcodeResponse>
+        callback: TallyResponseCallback<GenerateQrcodeResponse>
     ) {
         // Observe network state using InternetConfigViewModel
-        internetConfigViewModel.networkState(context)?.observe(this) {
+        internetConfigViewModel.networkState(this)?.observe(this) {
             // Check if the device is connected to the internet
             when {
                 // Initiate QR code generation through TallyViewModel
@@ -119,18 +119,143 @@ class TallyQrcodeGenerator : AppCompatActivity() {
                     object : ApiResponseHandler.Callback<GenerateQrcodeResponse> {
                         // Handle successful QR code generation response
                         override fun onSuccess(data: GenerateQrcodeResponse?) {
-                            callback.onQrcodeGenerateSuccess(data)
+                            callback.success(data)
                         }
 
                         // Handle QR code generation error
                         override fun onError(errorMessage: String?) {
-                            callback.onQrcodeGenerateFailed(errorMessage)
+                            callback.failed(errorMessage)
                         }
                     }
                 )
 
                 // Display a Toast message if the device is not connected
                 else -> Toast.makeText(
+                    this,
+                    "This device is not connected to Internet",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    /**
+     * Gets all transactions with the provided information
+     *
+     * @param qrcodeId The QrcodeId from which transactions will be queried
+     * @param page The number of pages to return
+     * @param pageSize The size of transactions to be returned in a page
+     * @param callback The callback for handling API response
+     */
+    fun getTransactions(
+        qrcodeId: String,
+        page: Int,
+        pageSize: Int,
+        callback: TallyResponseCallback<TransactionResponse>
+    ) {
+        internetConfigViewModel.networkState(this)?.observe(this) {
+            when {
+                true -> tallyViewModel.getTransactions(
+                    qrcodeId,
+                    page,
+                    pageSize,
+                    object : ApiResponseHandler.Callback<TransactionResponse> {
+                        override fun onSuccess(data: TransactionResponse?) {
+                            callback.success(data)
+                        }
+
+                        // Handle error when getting transactions
+                        override fun onError(errorMessage: String?) {
+                            callback.failed(errorMessage)
+                        }
+                    }
+                )
+
+                // Display a Toast message if the device is not connected
+                else -> Toast.makeText(
+                    this,
+                    "This device is not connected to Internet",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    /**
+     * Get selected merchant with the provided information
+     *
+     * @param token The authorization token
+     * @param search The name of merchant to search
+     * @param limit The limit
+     * @param page The number of pages to return
+     * @param callback The callback for handling API response
+     */
+    fun getMerchant(
+        token: String,
+        search: String,
+        limit: Int,
+        page: Int,
+        callback: TallyResponseCallback<MerchantResponse>
+    ) {
+        internetConfigViewModel.networkState(this)?.observe(this) {
+            when {
+                true -> tallyViewModel.getMerchant(
+                    token,
+                    search,
+                    limit,
+                    page,
+                    object : ApiResponseHandler.Callback<MerchantResponse> {
+                        override fun onSuccess(data: MerchantResponse?) {
+                            callback.success(data)
+                        }
+
+                        override fun onError(errorMessage: String?) {
+                            callback.failed(errorMessage)
+                        }
+                    }
+                )
+
+                false -> Toast.makeText(
+                    this,
+                    "This device is not connected to Internet",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    /**
+     * Get all merchants
+     *
+     * @param token The authorization token
+     * @param limit The page limit
+     * @param page The page number
+     * @param callback The callback for handling API response
+     */
+    fun getAllMerchants(
+        token: String,
+        limit: Int,
+        page: Int,
+        callback: TallyResponseCallback<AllMerchantResponse>
+    ) {
+        internetConfigViewModel.networkState(this)?.observe(this) {
+            when {
+                true -> tallyViewModel.getAllMerchant(
+                    token,
+                    limit,
+                    page,
+                    object : ApiResponseHandler.Callback<AllMerchantResponse> {
+                        override fun onSuccess(data: AllMerchantResponse?) {
+                            callback.success(data)
+                        }
+
+                        override fun onError(errorMessage: String?) {
+                            callback.failed(errorMessage)
+                        }
+                    }
+                )
+
+                false -> Toast.makeText(
                     this,
                     "This device is not connected to Internet",
                     Toast.LENGTH_LONG
