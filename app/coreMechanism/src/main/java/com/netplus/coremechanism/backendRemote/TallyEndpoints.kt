@@ -6,13 +6,16 @@ import com.netplus.coremechanism.backendRemote.model.merchants.AllMerchantRespon
 import com.netplus.coremechanism.backendRemote.model.merchants.MerchantResponse
 import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrPayload
 import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
+import com.netplus.coremechanism.backendRemote.model.qr.QrcodeIds
+import com.netplus.coremechanism.backendRemote.model.qr.retreive.GetTokenizedCardsResponse
+import com.netplus.coremechanism.backendRemote.model.qr.store.StoreTokenizedCardsPayload
+import com.netplus.coremechanism.backendRemote.model.qr.store.StoreTokenizedCardsResponse
 import com.netplus.coremechanism.backendRemote.model.transactions.TransactionResponse
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
-import retrofit2.http.Path
 import retrofit2.http.Query
 
 /**
@@ -39,6 +42,21 @@ interface TallyEndpoints {
     fun generateQrcode(@Body generateQrPayload: GenerateQrPayload): Call<GenerateQrcodeResponse>
 
     /**
+     * Sends a [POST] request to store user tokenized card info
+     * @param storeTokenizedCardsPayload
+     * @return A [Call] object wrapping the [StoreTokenizedCardsResponse]
+     */
+    @POST("storeQrInfo")
+    fun storeTokenizedCards(@Body storeTokenizedCardsPayload: StoreTokenizedCardsPayload): Call<StoreTokenizedCardsResponse>
+
+    /**
+     * Sends a [GET] request to retrieve all store qr tokens
+     * @return A [Call] object wrapping the [GetTokenizedCardsResponse]
+     */
+    @GET("fetchQrInfo")
+    fun getTokenizedCards(): Call<GetTokenizedCardsResponse>
+
+    /**
      * Sends a [GET] request to get all transactions performed from the tokenized/generated Qrcode
      *
      * @param qr_code_id
@@ -46,9 +64,9 @@ interface TallyEndpoints {
      * @param pageSize
      * @return A [Call] object wrapping the [TransactionResponse].
      */
-    @GET("qrcode_transactions/{qr_code_id}")
+    @GET("multiple-qrcode-transactions/")
     fun getTransactions(
-        @Path("qr_code_id") qr_code_id: String,
+        @Body qrcodeIds: QrcodeIds,
         @Query("page") page: Int,
         @Query("pageSize") pageSize: Int
     ): Call<TransactionResponse>
@@ -81,5 +99,5 @@ interface TallyEndpoints {
         @Header("token") token: String,
         @Query("limit") limit: Int,
         @Query("page") page: Int
-    ) : Call<AllMerchantResponse>
+    ): Call<AllMerchantResponse>
 }

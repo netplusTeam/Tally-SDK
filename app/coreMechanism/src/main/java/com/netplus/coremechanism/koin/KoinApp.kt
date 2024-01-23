@@ -46,7 +46,7 @@ class KoinApp : Application() {
      *
      * @return List of Koin modules.
      */
-    fun allModules(): List<Module> {
+    private fun allModules(): List<Module> {
         val token = AppPreferences.getInstance(this).getStringValue("token")
         //Network module providing Retrofit instance for API calls.
         val networkModule = module {
@@ -56,7 +56,7 @@ class KoinApp : Application() {
                     connectTimeout(30, TimeUnit.SECONDS)
                     addInterceptor { chain ->
                         val request = chain.request().newBuilder()
-                            .addHeader("token", token).build()
+                            .addHeader("token", TOKEN).build()
                         chain.proceed(request)
                     }
                 }.build()

@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.netplus.tally.ui.theme.TallyTheme
+import com.netplus.tallyqrgeneratorui.TallyActivity
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,7 +23,11 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    //Greeting("Android")
+                    val email = "nicholasanyanwu125@gmail.com"
+                    val password = "nicholasanyanwu125@gmail.com"
+                    val intent = TallyActivity.getIntent(this, email, password)
+                    startActivity(intent)
                 }
             }
         }

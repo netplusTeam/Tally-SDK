@@ -21,12 +21,12 @@ class AppPreferences private constructor(context: Context) {
         }
     }
 
-    fun setStringValue(value: String) {
-        editor.putString(TOKEN, value)
+    fun setStringValue(key:String, value: String) {
+        editor.putString(key, value)
         editor.apply()
     }
 
-    fun getStringValue(defaultValue: String): String {
-        return sharedPreferences.getString(TOKEN, defaultValue) ?: defaultValue
+    fun getStringValue(key:String, defaultValue: String): String {
+        return sharedPreferences.getString(key, defaultValue) ?: defaultValue
     }
 }

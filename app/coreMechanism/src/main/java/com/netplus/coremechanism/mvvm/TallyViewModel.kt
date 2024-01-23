@@ -5,6 +5,8 @@ import com.netplus.coremechanism.backendRemote.model.login.LoginResponse
 import com.netplus.coremechanism.backendRemote.model.merchants.AllMerchantResponse
 import com.netplus.coremechanism.backendRemote.model.merchants.MerchantResponse
 import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
+import com.netplus.coremechanism.backendRemote.model.qr.retreive.GetTokenizedCardsResponse
+import com.netplus.coremechanism.backendRemote.model.qr.store.StoreTokenizedCardsResponse
 import com.netplus.coremechanism.backendRemote.model.transactions.TransactionResponse
 import com.netplus.coremechanism.backendRemote.responseManager.ApiResponseHandler
 
@@ -68,6 +70,39 @@ class TallyViewModel(private val tallyRepository: TallyRepository) : ViewModel()
     )
 
     /**
+     * Stores tokenized qrcode with the provided information
+     *
+     * @param cardScheme The card type.
+     * @param email The user email.
+     * @param issuingBank The financial institution.
+     * @param qrCodeId The tokenized qr ID.
+     * @param qrToken The tokenized token.
+     * @param callback The callback for handling the API response.
+     */
+    fun storeTokenizedCards(
+        cardScheme: String,
+        email: String,
+        issuingBank: String,
+        qrCodeId: String,
+        qrToken: String,
+        callback: ApiResponseHandler.Callback<StoreTokenizedCardsResponse>
+    ) = tallyRepository.storeTokenizedCards(
+        cardScheme,
+        email,
+        issuingBank,
+        qrCodeId,
+        qrToken,
+        callback
+    )
+
+    /**
+     * Retrieves the stored tokenized qr
+     * @param callback
+     */
+    fun getStoredTokenizedCards(callback: ApiResponseHandler.Callback<GetTokenizedCardsResponse>) =
+        tallyRepository.getStoredTokenizedCards(callback)
+
+    /**
      * Gets all transactions with the provided information
      *
      * @param qrcodeId The QrcodeId from which transactions will be queried
@@ -76,7 +111,7 @@ class TallyViewModel(private val tallyRepository: TallyRepository) : ViewModel()
      * @param callback The callback for handling API response
      */
     fun getTransactions(
-        qrcodeId: String,
+        qrcodeId: List<String>,
         page: Int,
         pageSize: Int,
         callback: ApiResponseHandler.Callback<TransactionResponse>
