@@ -8,8 +8,8 @@ class AppPreferences private constructor(context: Context) {
     private val editor = sharedPreferences.edit()
 
     companion object {
-        private const val PREFS_NAME = "TallyPref"
-        private const val TOKEN = "token"
+        val PREFS_NAME = "TallyPref"
+        val TOKEN = "token"
 
         @Volatile
         private var instance: AppPreferences? = null

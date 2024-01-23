@@ -46,7 +46,7 @@ class TallyQrcodeGenerator : AppCompatActivity() {
                     callback.success(data)
                     // Save the authentication token to preferences
                     AppPreferences.getInstance(this@TallyQrcodeGenerator)
-                        .setStringValue(data?.token ?: "")
+                        .setStringValue(AppPreferences.TOKEN, data?.token ?: "")
                 }
 
                 override fun onError(errorMessage: String?) {
