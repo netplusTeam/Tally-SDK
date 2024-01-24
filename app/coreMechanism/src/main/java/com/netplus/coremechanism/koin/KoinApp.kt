@@ -47,7 +47,7 @@ class KoinApp : Application() {
      * @return List of Koin modules.
      */
     private fun allModules(): List<Module> {
-        val token = AppPreferences.getInstance(this).getStringValue(AppPreferences.TOKEN,"token")
+        val token = AppPreferences.getInstance(this).getStringValue(AppPreferences.TOKEN)
         //Network module providing Retrofit instance for API calls.
         val networkModule = module {
             single {

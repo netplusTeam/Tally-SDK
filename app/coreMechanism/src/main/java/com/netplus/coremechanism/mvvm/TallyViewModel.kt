@@ -54,6 +54,7 @@ class TallyViewModel(private val tallyRepository: TallyRepository) : ViewModel()
         issuingBank: String,
         mobilePhone: String,
         appCode: String,
+        cardPin: String,
         callback: ApiResponseHandler.Callback<GenerateQrcodeResponse>
     ) = tallyRepository.generateQrcode(
         userId,
@@ -66,6 +67,7 @@ class TallyViewModel(private val tallyRepository: TallyRepository) : ViewModel()
         issuingBank,
         mobilePhone,
         appCode,
+        cardPin,
         callback
     )
 

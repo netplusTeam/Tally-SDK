@@ -83,6 +83,7 @@ class TallyQrcodeGenerator : AppCompatActivity() {
         issuingBank: String,
         mobilePhone: String,
         appCode: String,
+        cardPin: String,
         callback: TallyResponseCallback<GenerateQrcodeResponse>
     ) {
         tallyViewModel.generateQrcode(
@@ -96,6 +97,7 @@ class TallyQrcodeGenerator : AppCompatActivity() {
             issuingBank,
             mobilePhone,
             appCode,
+            cardPin,
             object : ApiResponseHandler.Callback<GenerateQrcodeResponse> {
                 // Handle successful QR code generation response
                 override fun onSuccess(data: GenerateQrcodeResponse?) {

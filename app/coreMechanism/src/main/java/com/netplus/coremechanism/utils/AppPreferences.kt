@@ -10,6 +10,9 @@ class AppPreferences private constructor(context: Context) {
     companion object {
         val PREFS_NAME = "TallyPref"
         val TOKEN = "token"
+        val QRCODE_IMAGE = "qrcode_image"
+        val DATE_GENERATED = "date_generated"
+        val CARD_AND_BANK_SCHEME = "card_and_bank_scheme"
 
         @Volatile
         private var instance: AppPreferences? = null
@@ -26,7 +29,5 @@ class AppPreferences private constructor(context: Context) {
         editor.apply()
     }
 
-    fun getStringValue(key:String, defaultValue: String): String {
-        return sharedPreferences.getString(key, defaultValue) ?: defaultValue
-    }
+    fun getStringValue(key:String) = sharedPreferences.getString(key, "")
 }

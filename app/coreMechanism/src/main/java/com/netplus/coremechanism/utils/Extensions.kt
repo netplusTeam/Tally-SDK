@@ -1,12 +1,26 @@
+@file:OptIn(DelicateCoroutinesApi::class)
+
 package com.netplus.coremechanism.utils
 
+import android.content.ContentValues
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Environment
+import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Base64
+import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.widget.ImageView
 import androidx.appcompat.widget.AppCompatEditText
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
+import java.io.OutputStream
 import java.util.Calendar
 import java.util.regex.Pattern
 
@@ -134,4 +148,98 @@ fun isValidExpiryDate(month: Int, year: Int): Boolean {
     val currentMonth = currentDate.get(Calendar.MONTH) + 1 // Month is 0-indexed
 
     return year > currentYear || (year == currentYear && month >= currentMonth)
+}
+
+fun View.visible() {
+    this.visibility = View.VISIBLE
+}
+
+fun View.invisible() {
+    this.visibility = View.INVISIBLE
+}
+
+fun View.gone() {
+    this.visibility = View.GONE
+}
+
+fun setEditTextListener(editText: AppCompatEditText, nextEditText: AppCompatEditText?) {
+    editText.addTextChangedListener(object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+        override fun afterTextChanged(s: Editable?) {
+            if (s?.length == 1) {
+                nextEditText?.requestFocus()
+            }
+        }
+    })
+
+    editText.setOnEditorActionListener { _, actionId, _ ->
+        if (actionId == EditorInfo.IME_ACTION_NEXT) {
+            nextEditText?.requestFocus()
+            return@setOnEditorActionListener true
+        }
+        false
+    }
+}
+
+fun decodeBase64ToBitmap(base64String: String): Bitmap? {
+    try {
+        val byteData = Base64.decode(base64String, Base64.DEFAULT)
+        return BitmapFactory.decodeByteArray(byteData, 0, byteData.size)
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    return null
+}
+
+private fun getBitmapFromImageView(imageView: ImageView): Bitmap? {
+    imageView.isDrawingCacheEnabled = true
+    imageView.buildDrawingCache()
+    val bitmap = Bitmap.createBitmap(imageView.drawingCache)
+    imageView.isDrawingCacheEnabled = false
+    return bitmap
+}
+
+
+fun saveImageToGallery(context: Context, imageView: ImageView) {
+    val bitmap = getBitmapFromImageView(imageView)
+
+    if (bitmap != null) {
+        GlobalScope.launch(Dispatchers.IO) {
+            val uri = saveImageToMediaStore(context, bitmap)
+            // You can perform any additional actions here, like showing a toast or updating UI
+            //Toast.makeText(context, "Saved successfully", Toast.LENGTH_SHORT).show()
+        }
+    } else {
+        // Handle the case when the bitmap is null (e.g., if the ImageView doesn't have an image)
+        //Toast.makeText(context, "Unable to find QRCODE", Toast.LENGTH_SHORT).show()
+    }
+}
+
+private fun saveImageToMediaStore(context: Context, bitmap: Bitmap): String? {
+    val contentResolver = context.contentResolver
+    val contentValues = ContentValues().apply {
+        put(MediaStore.Images.Media.DISPLAY_NAME, "barcode_image")
+        put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+        put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+    }
+
+    val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+
+    try {
+        if (uri != null) {
+            val outputStream: OutputStream? = contentResolver.openOutputStream(uri)
+            if (outputStream != null) {
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                outputStream.close()
+            }
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        return null
+    }
+
+    return uri?.toString()
 }

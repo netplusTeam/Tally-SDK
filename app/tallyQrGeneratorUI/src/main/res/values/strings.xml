@@ -10,4 +10,6 @@
     <string name="mm">MM</string>
     <string name="cvv">CVV</string>
     <string name="generate_qr">GENERATE QR</string>
+    <string name="input_card_pin">Input Card Pin</string>
+    <string name="proceed">Proceed</string>
 </resources>

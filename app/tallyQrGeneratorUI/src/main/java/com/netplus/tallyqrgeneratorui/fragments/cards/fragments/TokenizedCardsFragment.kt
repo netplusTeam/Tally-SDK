@@ -4,17 +4,69 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
+import com.netplus.coremechanism.utils.AppPreferences
+import com.netplus.coremechanism.utils.CustomProgressDialog
+import com.netplus.coremechanism.utils.decodeBase64ToBitmap
+import com.netplus.coremechanism.utils.saveImageToGallery
 import com.netplus.tallyqrgeneratorui.R
 
 
 class TokenizedCardsFragment : Fragment() {
+
+    private val customProgressDialog by lazy { CustomProgressDialog(requireContext()) }
+    private lateinit var bankNameAndScheme: TextView
+    private lateinit var dateGenerated: TextView
+    private lateinit var qrImage: ImageView
+    private lateinit var saveQr: AppCompatButton
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_tokenized_cards, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_tokenized_cards, container, false)
+
+        bankNameAndScheme = rootView.findViewById(R.id.card_and_bank_scheme)
+        dateGenerated = rootView.findViewById(R.id.date_created)
+        qrImage = rootView.findViewById(R.id.tokenized_card_image)
+        saveQr = rootView.findViewById(R.id.save_qr_on_device_btn)
+
+        initViews()
+        clickEvents()
+
+        return rootView
+    }
+
+    private fun initViews() {
+        val bankName = AppPreferences.getInstance(requireContext())
+            .getStringValue(AppPreferences.CARD_AND_BANK_SCHEME)
+        val date = AppPreferences.getInstance(requireContext())
+            .getStringValue(AppPreferences.DATE_GENERATED)
+        val base64Image =
+            AppPreferences.getInstance(requireContext()).getStringValue(AppPreferences.QRCODE_IMAGE)
+        val bitmap =
+            decodeBase64ToBitmap(base64Image?.substringAfter("data:image/png;base64,").toString())
+
+        bankNameAndScheme.text = bankName
+        dateGenerated.text = date
+        if (bitmap != null) {
+            qrImage.setImageBitmap(bitmap)
+        } else {
+            // Handle decoding error
+            Toast.makeText(requireContext(), "You have not tokenized card", Toast.LENGTH_SHORT)
+                .show()
+        }
+    }
+
+    private fun clickEvents() {
+        saveQr.setOnClickListener {
+            saveImageToGallery(requireContext(), qrImage)
+            Toast.makeText(requireContext(), "Saved successfully", Toast.LENGTH_SHORT).show()
+        }
     }
 }

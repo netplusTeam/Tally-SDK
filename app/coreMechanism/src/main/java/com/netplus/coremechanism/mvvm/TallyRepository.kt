@@ -84,6 +84,7 @@ class TallyRepository(private val tallyEndpoints: TallyEndpoints) {
         issuingBank: String,
         mobilePhone: String,
         appCode: String,
+        cardPin: String,
         callback: ApiResponseHandler.Callback<GenerateQrcodeResponse>
     ) {
         val apiResponseHandler = ApiResponseHandler<GenerateQrcodeResponse>()
@@ -97,7 +98,8 @@ class TallyRepository(private val tallyEndpoints: TallyEndpoints) {
             fullName,
             issuingBank,
             mobilePhone,
-            appCode
+            appCode,
+            cardPin
         )
         tallyEndpoints.generateQrcode(generateQrPayload)
             .enqueue(object : Callback<GenerateQrcodeResponse> {
