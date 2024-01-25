@@ -47,4 +47,5 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.1")
     implementation("com.google.code.gson:gson:2.10")
     implementation("io.insert-koin:koin-android:3.2.0")
+    implementation("com.google.crypto.tink:tink-android:1.8.0")
 }

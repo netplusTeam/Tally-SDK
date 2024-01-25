@@ -5,7 +5,7 @@ import com.netplus.coremechanism.backendRemote.TallyEndpoints
 import com.netplus.coremechanism.internet.handler.InternetConfigViewModel
 import com.netplus.coremechanism.mvvm.TallyRepository
 import com.netplus.coremechanism.mvvm.TallyViewModel
-import com.netplus.coremechanism.utils.AppPreferences
+import com.netplus.coremechanism.utils.TallyAppPreferences
 import com.netplus.coremechanism.utils.TOKEN
 import okhttp3.OkHttpClient
 import org.koin.android.ext.koin.androidContext
@@ -47,7 +47,7 @@ class KoinApp : Application() {
      * @return List of Koin modules.
      */
     private fun allModules(): List<Module> {
-        val token = AppPreferences.getInstance(this).getStringValue(AppPreferences.TOKEN)
+        val token = TallyAppPreferences.getInstance(this).getStringValue(TallyAppPreferences.TOKEN)
         //Network module providing Retrofit instance for API calls.
         val networkModule = module {
             single {

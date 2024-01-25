@@ -9,7 +9,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 
-class CustomProgressDialog(context: Context) : Dialog(context) {
+class TallyCustomProgressDialog(context: Context) : Dialog(context) {
 
     //private val loadingTextView: TextView
     private val updateTextView: TextView

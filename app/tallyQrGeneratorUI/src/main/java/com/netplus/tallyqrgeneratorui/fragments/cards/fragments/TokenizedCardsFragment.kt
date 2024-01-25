@@ -9,8 +9,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
-import com.netplus.coremechanism.utils.AppPreferences
-import com.netplus.coremechanism.utils.CustomProgressDialog
+import com.netplus.coremechanism.utils.TallyAppPreferences
+import com.netplus.coremechanism.utils.TallyCustomProgressDialog
 import com.netplus.coremechanism.utils.decodeBase64ToBitmap
 import com.netplus.coremechanism.utils.saveImageToGallery
 import com.netplus.tallyqrgeneratorui.R
@@ -18,7 +18,7 @@ import com.netplus.tallyqrgeneratorui.R
 
 class TokenizedCardsFragment : Fragment() {
 
-    private val customProgressDialog by lazy { CustomProgressDialog(requireContext()) }
+    private val tallyCustomProgressDialog by lazy { TallyCustomProgressDialog(requireContext()) }
     private lateinit var bankNameAndScheme: TextView
     private lateinit var dateGenerated: TextView
     private lateinit var qrImage: ImageView
@@ -43,12 +43,12 @@ class TokenizedCardsFragment : Fragment() {
     }
 
     private fun initViews() {
-        val bankName = AppPreferences.getInstance(requireContext())
-            .getStringValue(AppPreferences.CARD_AND_BANK_SCHEME)
-        val date = AppPreferences.getInstance(requireContext())
-            .getStringValue(AppPreferences.DATE_GENERATED)
+        val bankName = TallyAppPreferences.getInstance(requireContext())
+            .getStringValue(TallyAppPreferences.CARD_AND_BANK_SCHEME)
+        val date = TallyAppPreferences.getInstance(requireContext())
+            .getStringValue(TallyAppPreferences.DATE_GENERATED)
         val base64Image =
-            AppPreferences.getInstance(requireContext()).getStringValue(AppPreferences.QRCODE_IMAGE)
+            TallyAppPreferences.getInstance(requireContext()).getStringValue(TallyAppPreferences.QRCODE_IMAGE)
         val bitmap =
             decodeBase64ToBitmap(base64Image?.substringAfter("data:image/png;base64,").toString())
 
@@ -58,7 +58,7 @@ class TokenizedCardsFragment : Fragment() {
             qrImage.setImageBitmap(bitmap)
         } else {
             // Handle decoding error
-            Toast.makeText(requireContext(), "You have not tokenized card", Toast.LENGTH_SHORT)
+            Toast.makeText(requireContext(), "You have not tokenized a card", Toast.LENGTH_SHORT)
                 .show()
         }
     }

@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import com.netplus.coremechanism.backendRemote.model.login.LoginResponse
-import com.netplus.coremechanism.utils.CustomProgressDialog
+import com.netplus.coremechanism.utils.TallyCustomProgressDialog
 import com.netplus.coremechanism.utils.TallyQrcodeGenerator
 import com.netplus.coremechanism.utils.TallyResponseCallback
 import com.netplus.tallyqrgeneratorui.adapters.TabPagerAdapter
@@ -41,11 +41,11 @@ class TallyActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tally)
 
-        val customProgressDialog = CustomProgressDialog(this)
+        val tallyCustomProgressDialog = TallyCustomProgressDialog(this)
 
         val email = intent.getStringExtra(EXTRA_EMAIL) ?: ""
         val password = intent.getStringExtra(EXTRA_PASSWORD) ?: ""
-        authenticateBank(email, password, customProgressDialog)
+        authenticateBank(email, password, tallyCustomProgressDialog)
 
         val tabPager = findViewById<ViewPager>(R.id.viewPager)
         val tabLayout = findViewById<TabLayout>(R.id.tally_tab)
@@ -82,27 +82,27 @@ class TallyActivity : AppCompatActivity() {
     private fun authenticateBank(
         email: String,
         password: String,
-        customProgressDialog: CustomProgressDialog
+        tallyCustomProgressDialog: TallyCustomProgressDialog
     ) {
-        customProgressDialog.show()
-        customProgressDialog.setUpdateText("Authentication...")
+        tallyCustomProgressDialog.show()
+        tallyCustomProgressDialog.setUpdateText("Authentication...")
 
         tallyQrcodeGenerator.authenticateBank(
             email = email,
             password = password,
             object : TallyResponseCallback<LoginResponse> {
                 override fun success(data: LoginResponse?) {
-                    customProgressDialog.setUpdateText("Authentication Successful")
+                    tallyCustomProgressDialog.setUpdateText("Authentication Successful")
                     Handler(Looper.getMainLooper()).postDelayed(
                         {
-                            customProgressDialog.dismiss()
+                            tallyCustomProgressDialog.dismiss()
                         }, 2000
                     )
                 }
 
                 override fun failed(message: String?) {
-                    customProgressDialog.setUpdateText(message.toString())
-                    customProgressDialog.dismiss()
+                    tallyCustomProgressDialog.setUpdateText(message.toString())
+                    tallyCustomProgressDialog.dismiss()
                     Handler(Looper.getMainLooper()).postDelayed({ onBackPressed() }, 2000)
                 }
             }

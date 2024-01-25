@@ -16,8 +16,9 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
 import com.netplus.coremechanism.backendRemote.model.qr.store.StoreTokenizedCardsResponse
-import com.netplus.coremechanism.utils.AppPreferences
-import com.netplus.coremechanism.utils.CustomProgressDialog
+import com.netplus.coremechanism.utils.TallSecurityUtil
+import com.netplus.coremechanism.utils.TallyAppPreferences
+import com.netplus.coremechanism.utils.TallyCustomProgressDialog
 import com.netplus.coremechanism.utils.TallyQrcodeGenerator
 import com.netplus.coremechanism.utils.TallyResponseCallback
 import com.netplus.coremechanism.utils.formatCardNumber
@@ -34,7 +35,7 @@ import com.netplus.tallyqrgeneratorui.R
 class CardsFragment : Fragment() {
 
     private val tallyQrcodeGenerator = TallyQrcodeGenerator()
-    private val customProgressDialog by lazy { CustomProgressDialog(requireContext()) }
+    private val tallyCustomProgressDialog by lazy { TallyCustomProgressDialog(requireContext()) }
     private lateinit var pinBottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
     private lateinit var cardNumber: AppCompatEditText
     private lateinit var cardExpiryMonth: AppCompatEditText
@@ -210,8 +211,8 @@ class CardsFragment : Fragment() {
     }
 
     private fun generateQrcode(isPinInputted: Boolean) {
-        customProgressDialog.show()
-        customProgressDialog.setUpdateText("Generating Qrcode...")
+        tallyCustomProgressDialog.show()
+        tallyCustomProgressDialog.setUpdateText("Generating Qrcode...")
 
         val cardExpiry = buildString {
             append(cardExpiryMonth.text.toString())
@@ -232,15 +233,16 @@ class CardsFragment : Fragment() {
             object : TallyResponseCallback<GenerateQrcodeResponse> {
                 override fun success(data: GenerateQrcodeResponse?) {
                     storeTokenizedCard(data)
+                    encryptQrToken(data)
                     hideBottomSheet()
                     saveResults(data)
                     clearForm()
                 }
 
                 override fun failed(message: String?) {
-                    customProgressDialog.setUpdateText(message.toString())
+                    tallyCustomProgressDialog.setUpdateText(message.toString())
                     Handler(Looper.getMainLooper()).postDelayed({
-                        customProgressDialog.dismiss()
+                        tallyCustomProgressDialog.dismiss()
                     }, 2000)
                 }
             })
@@ -255,19 +257,32 @@ class CardsFragment : Fragment() {
             qrToken = data?.data ?: "",
             object : TallyResponseCallback<StoreTokenizedCardsResponse> {
                 override fun success(data: StoreTokenizedCardsResponse?) {
-                    customProgressDialog.setUpdateText("Generating successful...")
+                    tallyCustomProgressDialog.setUpdateText("Generating successful...")
                     Handler(Looper.getMainLooper()).postDelayed({
-                        customProgressDialog.dismiss()
+                        tallyCustomProgressDialog.dismiss()
                     }, 2000)
                 }
 
                 override fun failed(message: String?) {
-                    customProgressDialog.setUpdateText(message.toString())
+                    tallyCustomProgressDialog.setUpdateText(message.toString())
                     Handler(Looper.getMainLooper()).postDelayed({
-                        customProgressDialog.dismiss()
+                        tallyCustomProgressDialog.dismiss()
                     }, 2000)
                 }
             })
+    }
+
+    private fun encryptQrToken(data: GenerateQrcodeResponse?) {
+        val jsonData = TallSecurityUtil.convertToJson(data)
+        TallSecurityUtil.storeData(requireContext(), jsonData)
+
+        val retrievedJsonData = TallSecurityUtil.retrieveData(requireContext())
+        val retrievedData = retrievedJsonData?.let {
+            TallSecurityUtil.convertFromJson(
+                it,
+                GenerateQrcodeResponse::class.java
+            )
+        }
     }
 
     private fun clearForm() {
@@ -278,14 +293,14 @@ class CardsFragment : Fragment() {
     }
 
     private fun saveResults(data: GenerateQrcodeResponse?) {
-        AppPreferences.getInstance(requireContext())
-            .setStringValue(AppPreferences.QRCODE_IMAGE, data?.data ?: "")
-        AppPreferences.getInstance(requireContext()).setStringValue(
-            AppPreferences.CARD_AND_BANK_SCHEME,
+        TallyAppPreferences.getInstance(requireContext())
+            .setStringValue(TallyAppPreferences.QRCODE_IMAGE, data?.data ?: "")
+        TallyAppPreferences.getInstance(requireContext()).setStringValue(
+            TallyAppPreferences.CARD_AND_BANK_SCHEME,
             "${data?.issuing_bank} ${data?.card_scheme}"
         )
-        AppPreferences.getInstance(requireContext())
-            .setStringValue(AppPreferences.DATE_GENERATED, data?.date ?: "")
+        TallyAppPreferences.getInstance(requireContext())
+            .setStringValue(TallyAppPreferences.DATE_GENERATED, data?.date ?: "")
     }
 
     private fun setUpBottomSheet() {

@@ -19,48 +19,9 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.io.ByteArrayOutputStream
 import java.io.OutputStream
 import java.util.Calendar
 import java.util.regex.Pattern
-
-fun base64ToBitmap(base64String: String): Bitmap? {
-    try {
-        val decodedBytes: ByteArray = Base64.decode(base64String, Base64.DEFAULT)
-        return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-    return null
-}
-
-fun bitmapToBase64(bitmap: Bitmap): String {
-    val byteArrayOutputStream = ByteArrayOutputStream()
-    bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
-    val byteArray = byteArrayOutputStream.toByteArray()
-    return Base64.encodeToString(byteArray, Base64.DEFAULT)
-}
-
-fun AppCompatEditText.addTextChangedListenerAfterTextChanged(action: (String) -> Unit): TextWatcher {
-    val textWatcher = object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
-        override fun afterTextChanged(s: Editable?) {
-            action.invoke(s.toString())
-        }
-    }
-
-    this.addTextChangedListener(textWatcher)
-    return textWatcher
-}
-
-fun AppCompatEditText.setTextWithoutTriggerListener(text: CharSequence, textWatcher: TextWatcher) {
-    this.removeTextChangedListener(textWatcher)
-    this.setText(text)
-    this.addTextChangedListener(textWatcher)
-}
 
 val listOfCardSchemes = listOf("Visa", "MasterCard", "American Express", "Discover", "Verve")
 

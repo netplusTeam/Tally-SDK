@@ -2,7 +2,7 @@ package com.netplus.coremechanism.utils
 
 import android.content.Context
 
-class AppPreferences private constructor(context: Context) {
+class TallyAppPreferences private constructor(context: Context) {
 
     private val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val editor = sharedPreferences.edit()
@@ -15,11 +15,11 @@ class AppPreferences private constructor(context: Context) {
         val CARD_AND_BANK_SCHEME = "card_and_bank_scheme"
 
         @Volatile
-        private var instance: AppPreferences? = null
+        private var instance: TallyAppPreferences? = null
 
-        fun getInstance(context: Context): AppPreferences {
+        fun getInstance(context: Context): TallyAppPreferences {
             return instance ?: synchronized(this) {
-                instance ?: AppPreferences(context).also { instance = it }
+                instance ?: TallyAppPreferences(context).also { instance = it }
             }
         }
     }
