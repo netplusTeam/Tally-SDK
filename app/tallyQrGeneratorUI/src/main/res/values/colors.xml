@@ -4,4 +4,5 @@
     <color name="tab_text_not_selected_color">#E5E2E6</color>
     <color name="black_color">#070707</color>
     <color name="purple_color">#410864</color>
+    <color name="light_purple_color">#E6CEF4</color>
 </resources>

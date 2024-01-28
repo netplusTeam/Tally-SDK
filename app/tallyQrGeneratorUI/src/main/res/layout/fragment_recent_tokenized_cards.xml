@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".fragments.cards.fragments.TokenizedCardsFragment">
+    tools:context=".fragments.cards.fragments.RecentTokenizedCardFragment">
 
     <ImageView
         android:id="@+id/tokenized_card_image"
@@ -49,7 +49,7 @@
         android:background="@drawable/edit_text_background"
         android:gravity="center"
         android:textAllCaps="true"
-        android:text="Save qr on device"
+        android:text="@string/save_qr_on_device"
         app:layout_constraintTop_toBottomOf="@id/date_created" />
 
     <ImageView

@@ -7,6 +7,8 @@ import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.crypto.tink.integration.android.AndroidKeysetManager
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
 import java.nio.charset.StandardCharsets
 
 object TallSecurityUtil {
@@ -40,29 +42,49 @@ object TallSecurityUtil {
         return String(aead.decrypt(encryptedData, ByteArray(0)), StandardCharsets.UTF_8)
     }
 
-    fun storeData(context: Context, data: String) {
-        val encryptedData = encryptData(context, data)
+    fun storeData(context: Context, newData: GenerateQrcodeResponse) {
+        val currentData = retrieveData(context) ?: listOf()
+        val updatedData = currentData + newData
+        val jsonData = convertToJson(updatedData)
+        val encryptedData = encryptData(context, jsonData)
         val base64EncryptedData = Base64.encodeToString(encryptedData, Base64.DEFAULT)
         val sharedPreferences = context.getSharedPreferences(PREFERENCE_FILE, Context.MODE_PRIVATE)
         sharedPreferences.edit().putString(DATA_KEY, base64EncryptedData).apply()
     }
 
-    fun retrieveData(context: Context): String? {
+    fun retrieveData(context: Context): List<GenerateQrcodeResponse>? {
         val sharedPreferences = context.getSharedPreferences(PREFERENCE_FILE, Context.MODE_PRIVATE)
         val base64EncryptedData = sharedPreferences.getString(DATA_KEY, null)
         return base64EncryptedData?.let {
             val encryptedData = Base64.decode(it, Base64.DEFAULT)
-            decryptData(context, encryptedData)
+            val decryptedJson = decryptData(context, encryptedData)
+            convertFromJson(decryptedJson)
         }
     }
 
-    fun <T> convertToJson(data: T): String {
+    fun deleteDataById(context: Context, qrcodeId: String) {
+        val currentData = retrieveData(context) ?: return
+        val qrcodeData = currentData.filterNot { it.qr_code_id == qrcodeId }
+        val jsonData = convertToJson(qrcodeData)
+        val encryptedData = encryptData(context, jsonData)
+        val base64EncryptedData = Base64.encodeToString(encryptedData, Base64.DEFAULT)
+        val sharedPreferences = context.getSharedPreferences(PREFERENCE_FILE, Context.MODE_PRIVATE)
+        sharedPreferences.edit().putString(DATA_KEY, base64EncryptedData).apply()
+    }
+
+    fun deleteAllData(context: Context) {
+        val sharedPreferences = context.getSharedPreferences(PREFERENCE_FILE, Context.MODE_PRIVATE)
+        sharedPreferences.edit().remove(DATA_KEY).apply()
+    }
+
+    private fun convertToJson(data: List<GenerateQrcodeResponse>): String {
         val gson = Gson()
         return gson.toJson(data)
     }
 
-    fun <T> convertFromJson(json: String, classOfT: Class<T>): T {
+    private fun convertFromJson(json: String): List<GenerateQrcodeResponse>? {
         val gson = Gson()
-        return gson.fromJson(json, classOfT)
+        val type = object : TypeToken<List<GenerateQrcodeResponse>>() {}.type
+        return gson.fromJson(json, type)
     }
 }

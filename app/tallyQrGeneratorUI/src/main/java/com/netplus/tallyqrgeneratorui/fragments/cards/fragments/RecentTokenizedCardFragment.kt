@@ -16,7 +16,7 @@ import com.netplus.coremechanism.utils.saveImageToGallery
 import com.netplus.tallyqrgeneratorui.R
 
 
-class TokenizedCardsFragment : Fragment() {
+class RecentTokenizedCardFragment : Fragment() {
 
     private val tallyCustomProgressDialog by lazy { TallyCustomProgressDialog(requireContext()) }
     private lateinit var bankNameAndScheme: TextView
@@ -29,7 +29,7 @@ class TokenizedCardsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val rootView = inflater.inflate(R.layout.fragment_tokenized_cards, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_recent_tokenized_cards, container, false)
 
         bankNameAndScheme = rootView.findViewById(R.id.card_and_bank_scheme)
         dateGenerated = rootView.findViewById(R.id.date_created)

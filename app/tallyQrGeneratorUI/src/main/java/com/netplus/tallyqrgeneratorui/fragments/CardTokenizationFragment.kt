@@ -1,4 +1,4 @@
-package com.netplus.tallyqrgeneratorui.fragments.cards
+package com.netplus.tallyqrgeneratorui.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,7 +10,7 @@ import com.google.android.material.tabs.TabLayout
 import com.netplus.tallyqrgeneratorui.R
 import com.netplus.tallyqrgeneratorui.adapters.TabPagerAdapter
 import com.netplus.tallyqrgeneratorui.fragments.cards.fragments.CardsFragment
-import com.netplus.tallyqrgeneratorui.fragments.cards.fragments.TokenizedCardsFragment
+import com.netplus.tallyqrgeneratorui.fragments.cards.fragments.RecentTokenizedCardFragment
 
 
 class CardTokenizationFragment : Fragment() {
@@ -32,12 +32,12 @@ class CardTokenizationFragment : Fragment() {
     private fun initTabs(tab: TabLayout, pager: ViewPager) {
         val tabFragments = ArrayList<Fragment>().apply {
             add(CardsFragment())
-            add(TokenizedCardsFragment())
+            add(RecentTokenizedCardFragment())
         }
 
         val tabTitles = ArrayList<String>().apply {
-            add("CARDS")
-            add("VIEW QR CARDS")
+            add("Card")
+            add("Recent Tokenized Card")
         }
 
         pager.adapter =

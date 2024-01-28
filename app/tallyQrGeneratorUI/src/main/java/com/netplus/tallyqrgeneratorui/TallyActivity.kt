@@ -15,9 +15,10 @@ import com.netplus.coremechanism.utils.TallyCustomProgressDialog
 import com.netplus.coremechanism.utils.TallyQrcodeGenerator
 import com.netplus.coremechanism.utils.TallyResponseCallback
 import com.netplus.tallyqrgeneratorui.adapters.TabPagerAdapter
+import com.netplus.tallyqrgeneratorui.fragments.AllTokenizedCardsFragment
+import com.netplus.tallyqrgeneratorui.fragments.CardTokenizationFragment
 import com.netplus.tallyqrgeneratorui.fragments.TallyMerchantsFragment
 import com.netplus.tallyqrgeneratorui.fragments.TokenizedCardsTransactionFragment
-import com.netplus.tallyqrgeneratorui.fragments.cards.CardTokenizationFragment
 
 class TallyActivity : AppCompatActivity() {
 
@@ -63,16 +64,22 @@ class TallyActivity : AppCompatActivity() {
     }
 
     private fun initTabs(tabLayout: TabLayout, tabPager: ViewPager) {
-        val tabFragments = ArrayList<Fragment>()
-        tabFragments.add(CardTokenizationFragment())
-        tabFragments.add(TokenizedCardsTransactionFragment())
-        tabFragments.add(TallyMerchantsFragment())
 
-        val tabTitles = ArrayList<String>()
-        tabTitles.add("CARDS")
-        tabTitles.add("TRANSACTION")
-        tabTitles.add("MERCHANTS")
+        val tabFragments = ArrayList<Fragment>().apply {
+            add(CardTokenizationFragment())
+            add(AllTokenizedCardsFragment())
+            add(TokenizedCardsTransactionFragment())
+            add(TallyMerchantsFragment())
+        }
 
+        val tabTitles = ArrayList<String>().apply {
+            add("Cards")
+            add("Tokenized Cards")
+            add("All Transactions")
+            add("All Merchants")
+        }
+
+        tabLayout.tabMode = TabLayout.MODE_SCROLLABLE
         tabPager.adapter = TabPagerAdapter(supportFragmentManager, tabFragments, tabTitles)
         tabPager.setPadding(0, 0, 0, 0)
         tabPager.pageMargin = 0

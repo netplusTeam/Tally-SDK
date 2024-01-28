@@ -273,15 +273,8 @@ class CardsFragment : Fragment() {
     }
 
     private fun encryptQrToken(data: GenerateQrcodeResponse?) {
-        val jsonData = TallSecurityUtil.convertToJson(data)
-        TallSecurityUtil.storeData(requireContext(), jsonData)
-
-        val retrievedJsonData = TallSecurityUtil.retrieveData(requireContext())
-        val retrievedData = retrievedJsonData?.let {
-            TallSecurityUtil.convertFromJson(
-                it,
-                GenerateQrcodeResponse::class.java
-            )
+        if (data != null) {
+            TallSecurityUtil.storeData(requireContext(), data)
         }
     }
 
