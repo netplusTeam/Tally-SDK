@@ -41,6 +41,7 @@ class TallyCustomProgressDialog(context: Context) : Dialog(context) {
 
         // Create the TextView for dynamic updates
         updateTextView = TextView(context)
+        updateTextView.textSize = 20f
         linearLayout.addView(updateTextView)
 
         // Add the LinearLayout to the dialog

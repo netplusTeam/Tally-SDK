@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatButton
@@ -12,7 +13,9 @@ import androidx.fragment.app.Fragment
 import com.netplus.coremechanism.utils.TallyAppPreferences
 import com.netplus.coremechanism.utils.TallyCustomProgressDialog
 import com.netplus.coremechanism.utils.decodeBase64ToBitmap
+import com.netplus.coremechanism.utils.gone
 import com.netplus.coremechanism.utils.saveImageToGallery
+import com.netplus.coremechanism.utils.visible
 import com.netplus.tallyqrgeneratorui.R
 
 
@@ -23,6 +26,7 @@ class RecentTokenizedCardFragment : Fragment() {
     private lateinit var dateGenerated: TextView
     private lateinit var qrImage: ImageView
     private lateinit var saveQr: AppCompatButton
+    private lateinit var qrInfoLayout: LinearLayout
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,6 +39,7 @@ class RecentTokenizedCardFragment : Fragment() {
         dateGenerated = rootView.findViewById(R.id.date_created)
         qrImage = rootView.findViewById(R.id.tokenized_card_image)
         saveQr = rootView.findViewById(R.id.save_qr_on_device_btn)
+        qrInfoLayout = rootView.findViewById(R.id.token_info_layout)
 
         initViews()
         clickEvents()
@@ -48,7 +53,8 @@ class RecentTokenizedCardFragment : Fragment() {
         val date = TallyAppPreferences.getInstance(requireContext())
             .getStringValue(TallyAppPreferences.DATE_GENERATED)
         val base64Image =
-            TallyAppPreferences.getInstance(requireContext()).getStringValue(TallyAppPreferences.QRCODE_IMAGE)
+            TallyAppPreferences.getInstance(requireContext())
+                .getStringValue(TallyAppPreferences.QRCODE_IMAGE)
         val bitmap =
             decodeBase64ToBitmap(base64Image?.substringAfter("data:image/png;base64,").toString())
 
@@ -56,10 +62,10 @@ class RecentTokenizedCardFragment : Fragment() {
         dateGenerated.text = date
         if (bitmap != null) {
             qrImage.setImageBitmap(bitmap)
+            switchViewVisibility(true)
         } else {
             // Handle decoding error
-            Toast.makeText(requireContext(), "You have not tokenized a card", Toast.LENGTH_SHORT)
-                .show()
+            switchViewVisibility(false)
         }
     }
 
@@ -67,6 +73,22 @@ class RecentTokenizedCardFragment : Fragment() {
         saveQr.setOnClickListener {
             saveImageToGallery(requireContext(), qrImage)
             Toast.makeText(requireContext(), "Saved successfully", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun switchViewVisibility(isAnyCardRecentlyTokenized: Boolean) {
+        if (isAnyCardRecentlyTokenized) {
+            qrInfoLayout.gone()
+            qrImage.visible()
+            bankNameAndScheme.visible()
+            dateGenerated.visible()
+            saveQr.visible()
+        } else {
+            qrImage.gone()
+            bankNameAndScheme.gone()
+            dateGenerated.gone()
+            saveQr.gone()
+            qrInfoLayout.visible()
         }
     }
 }

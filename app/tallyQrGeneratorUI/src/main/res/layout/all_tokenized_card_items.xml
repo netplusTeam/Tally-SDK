@@ -95,14 +95,14 @@
             app:layout_constraintTop_toBottomOf="@id/card_and_bank_scheme" />
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/save_qr_on_device_btn"
+            android:id="@+id/view_transaction_btn"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_marginHorizontal="50dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/edit_text_background"
             android:gravity="center"
-            android:text="@string/save_qr_on_device"
+            android:text="View transactions"
             android:textAllCaps="true"
             app:layout_constraintTop_toBottomOf="@id/date_created" />
 
@@ -115,6 +115,16 @@
             android:src="@drawable/baseline_arrow_circle_up_24"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
+
+        <ImageView
+            android:id="@+id/save_qr_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/image_view_raduis"
+            android:scaleType="centerCrop"
+            android:src="@drawable/baseline_backup_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

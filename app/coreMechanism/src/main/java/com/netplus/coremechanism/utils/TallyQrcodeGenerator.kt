@@ -7,7 +7,7 @@ import com.netplus.coremechanism.backendRemote.model.merchants.MerchantResponse
 import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
 import com.netplus.coremechanism.backendRemote.model.qr.retreive.GetTokenizedCardsResponse
 import com.netplus.coremechanism.backendRemote.model.qr.store.StoreTokenizedCardsResponse
-import com.netplus.coremechanism.backendRemote.model.transactions.TransactionResponse
+import com.netplus.coremechanism.backendRemote.model.transactions.Transaction
 import com.netplus.coremechanism.backendRemote.responseManager.ApiResponseHandler
 import com.netplus.coremechanism.internet.handler.InternetConfigViewModel
 import com.netplus.coremechanism.mvvm.TallyViewModel
@@ -175,14 +175,14 @@ class TallyQrcodeGenerator : AppCompatActivity() {
         qrcodeId: List<String>,
         page: Int,
         pageSize: Int,
-        callback: TallyResponseCallback<TransactionResponse>
+        callback: TallyResponseCallback<List<Transaction>>
     ) {
         tallyViewModel.getTransactions(
             qrcodeId,
             page,
             pageSize,
-            object : ApiResponseHandler.Callback<TransactionResponse> {
-                override fun onSuccess(data: TransactionResponse?) {
+            object : ApiResponseHandler.Callback<List<Transaction>> {
+                override fun onSuccess(data: List<Transaction>?) {
                     callback.success(data)
                 }
 

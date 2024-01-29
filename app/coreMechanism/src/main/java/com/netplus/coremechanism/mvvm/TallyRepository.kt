@@ -11,7 +11,7 @@ import com.netplus.coremechanism.backendRemote.model.qr.QrcodeIds
 import com.netplus.coremechanism.backendRemote.model.qr.retreive.GetTokenizedCardsResponse
 import com.netplus.coremechanism.backendRemote.model.qr.store.StoreTokenizedCardsPayload
 import com.netplus.coremechanism.backendRemote.model.qr.store.StoreTokenizedCardsResponse
-import com.netplus.coremechanism.backendRemote.model.transactions.TransactionResponse
+import com.netplus.coremechanism.backendRemote.model.transactions.Transaction
 import com.netplus.coremechanism.backendRemote.responseManager.ApiResponseHandler
 import com.netplus.coremechanism.backendRemote.responseManager.ErrorMapper
 import retrofit2.Call
@@ -199,15 +199,15 @@ class TallyRepository(private val tallyEndpoints: TallyEndpoints) {
         qrcodeId: List<String>,
         page: Int,
         pageSize: Int,
-        callback: ApiResponseHandler.Callback<TransactionResponse>
+        callback: ApiResponseHandler.Callback<List<Transaction>>
     ) {
         val qrcodeIds = QrcodeIds(qrcodeId)
-        val apiResponseHandler = ApiResponseHandler<TransactionResponse>()
+        val apiResponseHandler = ApiResponseHandler<List<Transaction>>()
         tallyEndpoints.getTransactions(qrcodeIds, page, pageSize)
-            .enqueue(object : Callback<TransactionResponse> {
+            .enqueue(object : Callback<List<Transaction>> {
                 override fun onResponse(
-                    call: Call<TransactionResponse>,
-                    response: Response<TransactionResponse>
+                    call: Call<List<Transaction>>,
+                    response: Response<List<Transaction>>
                 ) {
                     if (response.isSuccessful) {
                         apiResponseHandler.handleResponse(response.body(), null, callback)
@@ -217,7 +217,7 @@ class TallyRepository(private val tallyEndpoints: TallyEndpoints) {
                     }
                 }
 
-                override fun onFailure(call: Call<TransactionResponse>, t: Throwable) {
+                override fun onFailure(call: Call<List<Transaction>>, t: Throwable) {
                     apiResponseHandler.handleResponse(null, t.message, callback)
                 }
             })

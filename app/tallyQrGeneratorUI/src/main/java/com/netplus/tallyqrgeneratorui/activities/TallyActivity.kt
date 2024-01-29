@@ -1,4 +1,4 @@
-package com.netplus.tallyqrgeneratorui
+package com.netplus.tallyqrgeneratorui.activities
 
 import android.content.Context
 import android.content.Intent
@@ -14,6 +14,7 @@ import com.netplus.coremechanism.backendRemote.model.login.LoginResponse
 import com.netplus.coremechanism.utils.TallyCustomProgressDialog
 import com.netplus.coremechanism.utils.TallyQrcodeGenerator
 import com.netplus.coremechanism.utils.TallyResponseCallback
+import com.netplus.tallyqrgeneratorui.R
 import com.netplus.tallyqrgeneratorui.adapters.TabPagerAdapter
 import com.netplus.tallyqrgeneratorui.fragments.AllTokenizedCardsFragment
 import com.netplus.tallyqrgeneratorui.fragments.CardTokenizationFragment

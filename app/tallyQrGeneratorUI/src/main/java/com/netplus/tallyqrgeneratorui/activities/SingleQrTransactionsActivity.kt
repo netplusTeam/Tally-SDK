@@ -1,47 +1,47 @@
-package com.netplus.tallyqrgeneratorui.fragments
+package com.netplus.tallyqrgeneratorui.activities
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.Toast
-import androidx.fragment.app.Fragment
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.netplus.coremechanism.backendRemote.model.transactions.Transaction
-import com.netplus.coremechanism.utils.TallSecurityUtil
-import com.netplus.coremechanism.utils.TallyCustomProgressDialog
 import com.netplus.coremechanism.utils.TallyQrcodeGenerator
 import com.netplus.coremechanism.utils.TallyResponseCallback
-import com.netplus.coremechanism.utils.extractQrCodeIds
+import com.netplus.coremechanism.utils.extra
 import com.netplus.coremechanism.utils.gone
 import com.netplus.coremechanism.utils.visible
 import com.netplus.tallyqrgeneratorui.R
 import com.netplus.tallyqrgeneratorui.adapters.SingleQrTransactionAdapter
 
-class TokenizedCardsTransactionFragment : Fragment() {
+class SingleQrTransactionsActivity : AppCompatActivity(), SingleQrTransactionAdapter.Interaction {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var singleQrTransactionAdapter: SingleQrTransactionAdapter
     private val tallyQrcodeGenerator = TallyQrcodeGenerator()
+    private val qrcodeId by extra<String>("qrcode_id")
     private lateinit var qrInfoLayout: LinearLayout
-    private val tallyCustomProgressDialog by lazy { TallyCustomProgressDialog(requireContext()) }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        val rootView = inflater.inflate(R.layout.fragment_tokenized_cards_transaction, container, false)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_single_qr_transactions)
 
-        recyclerView = rootView.findViewById(R.id.all_qr_transaction_recycler)
-        qrInfoLayout = rootView.findViewById(R.id.token_info_layout)
+        recyclerView = findViewById(R.id.single_qr_transaction_recycler)
+        qrInfoLayout = findViewById(R.id.token_info_layout)
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
 
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
 
-        return rootView
+        toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
+
+        recyclerView.layoutManager = LinearLayoutManager(this)
     }
 
     override fun onResume() {
@@ -50,11 +50,9 @@ class TokenizedCardsTransactionFragment : Fragment() {
     }
 
     private fun observer() {
-        val tokenizedCardsData = TallSecurityUtil.retrieveData(requireContext())
-        val qrcodeIds = extractQrCodeIds(tokenizedCardsData ?: emptyList())
-        Log.e("QR", "Data: $qrcodeIds")
+        val qrcodeId = listOf(qrcodeId ?: "")
         tallyQrcodeGenerator.getTransactions(
-            qrcodeIds,
+            qrcodeId,
             1,
             10,
             object : TallyResponseCallback<List<Transaction>> {
@@ -65,19 +63,22 @@ class TokenizedCardsTransactionFragment : Fragment() {
                     } else {
                         switchViewVisibility(false)
                         singleQrTransactionAdapter = SingleQrTransactionAdapter(
-                            null,
+                            this@SingleQrTransactionsActivity,
                             data
                         )
                         recyclerView.adapter = singleQrTransactionAdapter
                     }
-
                 }
 
                 override fun failed(message: String?) {
-                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT)
+                    Toast.makeText(this@SingleQrTransactionsActivity, message, Toast.LENGTH_SHORT)
                         .show()
                 }
             })
+    }
+
+    override fun onItemSelected() {
+
     }
 
     private fun switchViewVisibility(isListEmpty: Boolean) {

@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.netplus.tally.ui.theme.TallyTheme
-import com.netplus.tallyqrgeneratorui.TallyActivity
+import com.netplus.tallyqrgeneratorui.activities.TallyActivity
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

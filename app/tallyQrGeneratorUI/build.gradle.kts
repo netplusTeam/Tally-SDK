@@ -47,6 +47,7 @@ dependencies {
     implementation("com.google.android.material:material:1.4.0") // Use the version appropriate for your project
     //implementation("com.android.databinding:compiler:3.5.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.databinding:databinding-runtime:8.2.1")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

@@ -10,12 +10,14 @@ import com.netplus.coremechanism.backendRemote.model.qr.QrcodeIds
 import com.netplus.coremechanism.backendRemote.model.qr.retreive.GetTokenizedCardsResponse
 import com.netplus.coremechanism.backendRemote.model.qr.store.StoreTokenizedCardsPayload
 import com.netplus.coremechanism.backendRemote.model.qr.store.StoreTokenizedCardsResponse
+import com.netplus.coremechanism.backendRemote.model.transactions.Transaction
 import com.netplus.coremechanism.backendRemote.model.transactions.TransactionResponse
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 /**
@@ -64,9 +66,16 @@ interface TallyEndpoints {
      * @param pageSize
      * @return A [Call] object wrapping the [TransactionResponse].
      */
-    @GET("multiple-qrcode-transactions/")
+    @POST("multiple-qrcode-transactions/")
     fun getTransactions(
         @Body qrcodeIds: QrcodeIds,
+        @Query("page") page: Int,
+        @Query("pageSize") pageSize: Int
+    ): Call<List<Transaction>>
+
+    @GET("qrcode_transactions/{qr_code_id}")
+    fun getAllTransaction(
+        @Path("qr_code_id") qr_code_id: String,
         @Query("page") page: Int,
         @Query("pageSize") pageSize: Int
     ): Call<TransactionResponse>

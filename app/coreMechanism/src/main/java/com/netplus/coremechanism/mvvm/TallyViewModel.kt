@@ -7,7 +7,7 @@ import com.netplus.coremechanism.backendRemote.model.merchants.MerchantResponse
 import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
 import com.netplus.coremechanism.backendRemote.model.qr.retreive.GetTokenizedCardsResponse
 import com.netplus.coremechanism.backendRemote.model.qr.store.StoreTokenizedCardsResponse
-import com.netplus.coremechanism.backendRemote.model.transactions.TransactionResponse
+import com.netplus.coremechanism.backendRemote.model.transactions.Transaction
 import com.netplus.coremechanism.backendRemote.responseManager.ApiResponseHandler
 
 /**
@@ -116,7 +116,7 @@ class TallyViewModel(private val tallyRepository: TallyRepository) : ViewModel()
         qrcodeId: List<String>,
         page: Int,
         pageSize: Int,
-        callback: ApiResponseHandler.Callback<TransactionResponse>
+        callback: ApiResponseHandler.Callback<List<Transaction>>
     ) = tallyRepository.getTransactions(qrcodeId, page, pageSize, callback)
 
     /**

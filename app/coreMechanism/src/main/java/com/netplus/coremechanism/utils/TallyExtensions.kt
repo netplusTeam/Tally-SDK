@@ -2,10 +2,13 @@
 
 package com.netplus.coremechanism.utils
 
+import android.app.Activity
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.text.Editable
@@ -15,11 +18,14 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import androidx.appcompat.widget.AppCompatEditText
+import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.OutputStream
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.util.Calendar
 import java.util.regex.Pattern
 
@@ -203,4 +209,37 @@ private fun saveImageToMediaStore(context: Context, bitmap: Bitmap): String? {
     }
 
     return uri?.toString()
+}
+
+fun String.toDecimalFormat(includeCurrency: Boolean): String {
+
+    val symbols = DecimalFormatSymbols()
+    symbols.decimalSeparator = '.'
+    val decimalFormat = if (includeCurrency) {
+        DecimalFormat("₦ #,##0.00")
+    } else {
+        DecimalFormat("#,##0.00")
+    }
+
+    return decimalFormat.format(toDouble())
+}
+
+inline fun <reified T : Any> Context.launchActivity(
+    options: Bundle? = null,
+    noinline init: Intent.() -> Unit = {}
+) {
+    val intent = newIntent<T>(this)
+    intent.init()
+    startActivity(intent, options)
+}
+
+inline fun <reified T : Any> newIntent(context: Context): Intent = Intent(context, T::class.java)
+
+inline fun <reified T : Any> Activity.extra(key: String, default: T? = null) = lazy {
+    val value = intent?.extras?.get(key)
+    if (value is T) value else default
+}
+
+fun extractQrCodeIds(dataList: List<GenerateQrcodeResponse>): List<String> {
+    return dataList.map { it.qr_code_id.toString() }
 }

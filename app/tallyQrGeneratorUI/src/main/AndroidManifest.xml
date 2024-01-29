@@ -5,10 +5,15 @@
 
     <application>
         <activity
-            android:name=".activities.TokenizedCardDetailsActivity"
-            android:exported="false" />
+            android:name=".activities.SingleQrTransactionsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"/>
         <activity
-            android:name=".TallyActivity"
+            android:name=".activities.TokenizedCardDetailsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"/>
+        <activity
+            android:name=".activities.TallyActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
     </application>
