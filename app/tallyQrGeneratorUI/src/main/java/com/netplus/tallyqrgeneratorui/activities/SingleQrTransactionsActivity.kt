@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.netplus.coremechanism.backendRemote.model.transactions.Transaction
+import com.netplus.coremechanism.backendRemote.model.transactions.updatedTransaction.UpdatedTransactionResponse
 import com.netplus.coremechanism.utils.TallyQrcodeGenerator
 import com.netplus.coremechanism.utils.TallyResponseCallback
 import com.netplus.coremechanism.utils.extra
@@ -16,6 +16,7 @@ import com.netplus.coremechanism.utils.gone
 import com.netplus.coremechanism.utils.visible
 import com.netplus.tallyqrgeneratorui.R
 import com.netplus.tallyqrgeneratorui.adapters.SingleQrTransactionAdapter
+import com.netplus.tallyqrgeneratorui.utils.ProgressDialogUtil
 
 class SingleQrTransactionsActivity : AppCompatActivity(), SingleQrTransactionAdapter.Interaction {
 
@@ -24,6 +25,7 @@ class SingleQrTransactionsActivity : AppCompatActivity(), SingleQrTransactionAda
     private val tallyQrcodeGenerator = TallyQrcodeGenerator()
     private val qrcodeId by extra<String>("qrcode_id")
     private lateinit var qrInfoLayout: LinearLayout
+    private val progressDialogUtil by lazy { ProgressDialogUtil(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +34,7 @@ class SingleQrTransactionsActivity : AppCompatActivity(), SingleQrTransactionAda
         recyclerView = findViewById(R.id.single_qr_transaction_recycler)
         qrInfoLayout = findViewById(R.id.token_info_layout)
         val toolbar: Toolbar = findViewById(R.id.toolbar)
+        toolbar.title = "Qr Transaction"
         setSupportActionBar(toolbar)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -50,27 +53,30 @@ class SingleQrTransactionsActivity : AppCompatActivity(), SingleQrTransactionAda
     }
 
     private fun observer() {
-        val qrcodeId = listOf(qrcodeId ?: "")
+        progressDialogUtil.showProgressDialog("Loading...")
+        val qr_code_ids = listOf("8a17cd9f-1946-4418-8453-23318d95e01c")
         tallyQrcodeGenerator.getTransactions(
-            qrcodeId,
-            1,
+            qr_code_ids,
+            2,
             10,
-            object : TallyResponseCallback<List<Transaction>> {
-                override fun success(data: List<Transaction>?) {
+            object : TallyResponseCallback<UpdatedTransactionResponse> {
+                override fun success(data: UpdatedTransactionResponse?) {
+                    progressDialogUtil.dismissProgressDialog()
                     Log.e("TAG", "success: $data")
-                    if (data.isNullOrEmpty()) {
+                    if (data?.data?.rows.isNullOrEmpty()) {
                         switchViewVisibility(true)
                     } else {
                         switchViewVisibility(false)
                         singleQrTransactionAdapter = SingleQrTransactionAdapter(
                             this@SingleQrTransactionsActivity,
-                            data
+                            data?.data?.rows ?: emptyList()
                         )
                         recyclerView.adapter = singleQrTransactionAdapter
                     }
                 }
 
                 override fun failed(message: String?) {
+                    progressDialogUtil.dismissProgressDialog()
                     Toast.makeText(this@SingleQrTransactionsActivity, message, Toast.LENGTH_SHORT)
                         .show()
                 }
@@ -89,5 +95,15 @@ class SingleQrTransactionsActivity : AppCompatActivity(), SingleQrTransactionAda
             recyclerView.visible()
             qrInfoLayout.gone()
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        progressDialogUtil.dismissProgressDialog()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        progressDialogUtil.dismissProgressDialog()
     }
 }

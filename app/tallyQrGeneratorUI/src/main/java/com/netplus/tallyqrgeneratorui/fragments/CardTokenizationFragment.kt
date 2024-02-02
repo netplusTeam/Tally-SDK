@@ -1,19 +1,31 @@
 package com.netplus.tallyqrgeneratorui.fragments
 
+import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
+import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
 import com.netplus.tallyqrgeneratorui.R
 import com.netplus.tallyqrgeneratorui.adapters.TabPagerAdapter
 import com.netplus.tallyqrgeneratorui.fragments.cards.fragments.CardsFragment
 import com.netplus.tallyqrgeneratorui.fragments.cards.fragments.RecentTokenizedCardFragment
+import com.netplus.tallyqrgeneratorui.utils.DataTransferInterface
 
 
 class CardTokenizationFragment : Fragment() {
+
+    private lateinit var tabLayout: TabLayout
+    private lateinit var pager: ViewPager
+    private lateinit var receiver: BroadcastReceiver
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -21,10 +33,13 @@ class CardTokenizationFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         val rootView = inflater.inflate(R.layout.fragment_card_tokenization, container, false)
-        val tab = rootView.findViewById<TabLayout>(R.id.cards_tokenization_tab)
-        val pager = rootView.findViewById<ViewPager>(R.id.viewPager)
+        tabLayout = rootView.findViewById(R.id.cards_tokenization_tab)
+        pager = rootView.findViewById(R.id.viewPager)
 
-        initTabs(tab, pager)
+        initTabs(tabLayout, pager)
+
+        LocalBroadcastManager.getInstance(requireContext())
+            .registerReceiver(receiver, IntentFilter("swipeAction"))
 
         return rootView
     }
@@ -45,5 +60,23 @@ class CardTokenizationFragment : Fragment() {
         pager.setPadding(0, 0, 0, 0)
         pager.pageMargin = 0
         tab.setupWithViewPager(pager)
+        startAutoSwipe()
+    }
+
+    private fun startAutoSwipe() {
+        receiver = object : BroadcastReceiver() {
+            @SuppressLint("SetTextI18n")
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent?.action == "swipeAction") {
+                    val generateQrcodeResponse =
+                        intent.getSerializableExtra("generateQrcodeResponse") as? GenerateQrcodeResponse
+                    val nextItem = (pager.currentItem + 1) % pager.adapter!!.count
+                    pager.setCurrentItem(nextItem, true)
+                    val fragment =
+                        pager.adapter?.instantiateItem(pager, nextItem) as? DataTransferInterface
+                    fragment?.transferData(generateQrcodeResponse)
+                }
+            }
+        }
     }
 }

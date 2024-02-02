@@ -7,7 +7,7 @@ import com.netplus.coremechanism.backendRemote.model.merchants.MerchantResponse
 import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
 import com.netplus.coremechanism.backendRemote.model.qr.retreive.GetTokenizedCardsResponse
 import com.netplus.coremechanism.backendRemote.model.qr.store.StoreTokenizedCardsResponse
-import com.netplus.coremechanism.backendRemote.model.transactions.Transaction
+import com.netplus.coremechanism.backendRemote.model.transactions.updatedTransaction.UpdatedTransactionResponse
 import com.netplus.coremechanism.backendRemote.responseManager.ApiResponseHandler
 import com.netplus.coremechanism.internet.handler.InternetConfigViewModel
 import com.netplus.coremechanism.mvvm.TallyViewModel
@@ -22,6 +22,7 @@ class TallyQrcodeGenerator : AppCompatActivity() {
         // Lazy initialization of TallyViewModel and InternetConfigViewModel
         private val tallyViewModel: TallyViewModel by lazy { getKoin().get<TallyViewModel>() }
         private val internetConfigViewModel: InternetConfigViewModel by lazy { getKoin().get<InternetConfigViewModel>() }
+
     }
 
     /**
@@ -102,6 +103,7 @@ class TallyQrcodeGenerator : AppCompatActivity() {
                 // Handle successful QR code generation response
                 override fun onSuccess(data: GenerateQrcodeResponse?) {
                     callback.success(data)
+                    tallyViewModel.transferGeneratedQrData(data)
                 }
 
                 // Handle QR code generation error
@@ -172,17 +174,17 @@ class TallyQrcodeGenerator : AppCompatActivity() {
      * @param callback The callback for handling API response
      */
     fun getTransactions(
-        qrcodeId: List<String>,
+        qr_code_ids: List<String>,
         page: Int,
         pageSize: Int,
-        callback: TallyResponseCallback<List<Transaction>>
+        callback: TallyResponseCallback<UpdatedTransactionResponse>
     ) {
         tallyViewModel.getTransactions(
-            qrcodeId,
+            qr_code_ids,
             page,
             pageSize,
-            object : ApiResponseHandler.Callback<List<Transaction>> {
-                override fun onSuccess(data: List<Transaction>?) {
+            object : ApiResponseHandler.Callback<UpdatedTransactionResponse> {
+                override fun onSuccess(data: UpdatedTransactionResponse?) {
                     callback.success(data)
                 }
 
@@ -236,12 +238,14 @@ class TallyQrcodeGenerator : AppCompatActivity() {
      * @param callback The callback for handling API response
      */
     fun getAllMerchants(
+        url: String,
         token: String,
         limit: Int,
         page: Int,
         callback: TallyResponseCallback<AllMerchantResponse>
     ) {
         tallyViewModel.getAllMerchant(
+            url,
             token,
             limit,
             page,

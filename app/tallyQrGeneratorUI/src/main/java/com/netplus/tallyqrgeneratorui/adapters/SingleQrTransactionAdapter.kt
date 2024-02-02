@@ -5,13 +5,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.netplus.coremechanism.backendRemote.model.transactions.Transaction
+import com.netplus.coremechanism.backendRemote.model.transactions.updatedTransaction.Row
+import com.netplus.coremechanism.utils.convertDateToReadableFormat
 import com.netplus.coremechanism.utils.toDecimalFormat
 import com.netplus.tallyqrgeneratorui.R
 
 class SingleQrTransactionAdapter(
     private val interaction: Interaction? = null,
-    private val transaction: List<Transaction>
+    private val transaction: List<Row>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -39,10 +40,10 @@ class SingleQrTransactionAdapter(
         private val transactionAmount = itemView.findViewById<TextView>(R.id.transaction_amount)
         private val transactionDate = itemView.findViewById<TextView>(R.id.transaction_date)
 
-        fun bind(transaction: Transaction) {
+        fun bind(transaction: Row) {
             merchantName.text = transaction.merchantName
             transactionAmount.text = transaction.amount.toString().toDecimalFormat(true)
-            transactionDate.text = transaction.dateCreated
+            transactionDate.text = convertDateToReadableFormat(transaction.dateCreated)
         }
     }
 

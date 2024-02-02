@@ -1,5 +1,6 @@
 package com.netplus.tallyqrgeneratorui.fragments.cards.fragments
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,18 +11,16 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
-import com.netplus.coremechanism.utils.TallyAppPreferences
-import com.netplus.coremechanism.utils.TallyCustomProgressDialog
+import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
 import com.netplus.coremechanism.utils.decodeBase64ToBitmap
 import com.netplus.coremechanism.utils.gone
 import com.netplus.coremechanism.utils.saveImageToGallery
 import com.netplus.coremechanism.utils.visible
 import com.netplus.tallyqrgeneratorui.R
+import com.netplus.tallyqrgeneratorui.utils.DataTransferInterface
 
+class RecentTokenizedCardFragment : Fragment(), DataTransferInterface {
 
-class RecentTokenizedCardFragment : Fragment() {
-
-    private val tallyCustomProgressDialog by lazy { TallyCustomProgressDialog(requireContext()) }
     private lateinit var bankNameAndScheme: TextView
     private lateinit var dateGenerated: TextView
     private lateinit var qrImage: ImageView
@@ -41,32 +40,20 @@ class RecentTokenizedCardFragment : Fragment() {
         saveQr = rootView.findViewById(R.id.save_qr_on_device_btn)
         qrInfoLayout = rootView.findViewById(R.id.token_info_layout)
 
-        initViews()
+
         clickEvents()
 
         return rootView
     }
 
-    private fun initViews() {
-        val bankName = TallyAppPreferences.getInstance(requireContext())
-            .getStringValue(TallyAppPreferences.CARD_AND_BANK_SCHEME)
-        val date = TallyAppPreferences.getInstance(requireContext())
-            .getStringValue(TallyAppPreferences.DATE_GENERATED)
-        val base64Image =
-            TallyAppPreferences.getInstance(requireContext())
-                .getStringValue(TallyAppPreferences.QRCODE_IMAGE)
-        val bitmap =
-            decodeBase64ToBitmap(base64Image?.substringAfter("data:image/png;base64,").toString())
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initViews()
+    }
 
-        bankNameAndScheme.text = bankName
-        dateGenerated.text = date
-        if (bitmap != null) {
-            qrImage.setImageBitmap(bitmap)
-            switchViewVisibility(true)
-        } else {
-            // Handle decoding error
-            switchViewVisibility(false)
-        }
+    @SuppressLint("SetTextI18n")
+    private fun initViews() {
+        //val tokenizedCardsData = TallSecurityUtil.retrieveData(requireContext())
     }
 
     private fun clickEvents() {
@@ -89,6 +76,33 @@ class RecentTokenizedCardFragment : Fragment() {
             dateGenerated.gone()
             saveQr.gone()
             qrInfoLayout.visible()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        switchViewVisibility(false)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        switchViewVisibility(false)
+    }
+
+    @SuppressLint("SetTextI18n")
+    override fun transferData(generateQrcodeResponse: GenerateQrcodeResponse?) {
+        if (generateQrcodeResponse != null) {
+            val image = decodeBase64ToBitmap(
+                generateQrcodeResponse.data.toString().substringAfter("data:image/png;base64,")
+            )
+            bankNameAndScheme.text =
+                "${generateQrcodeResponse.issuing_bank} ${generateQrcodeResponse.card_scheme}"
+            dateGenerated.text = generateQrcodeResponse.date
+            qrImage.setImageBitmap(image)
+            switchViewVisibility(true)
+        } else {
+            // Handle decoding error
+            switchViewVisibility(false)
         }
     }
 }

@@ -3,11 +3,15 @@ package com.netplus.tallyqrgeneratorui.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.netplus.coremechanism.backendRemote.model.merchants.Merchant
+import com.netplus.coremechanism.utils.gone
+import com.netplus.coremechanism.utils.visible
 import com.netplus.tallyqrgeneratorui.R
+import org.osmdroid.views.MapView
 
 class AllMerchantAdapter(
     private val interaction: Interaction? = null,
@@ -39,16 +43,24 @@ class AllMerchantAdapter(
         private val merchantEmail = itemView.findViewById<TextView>(R.id.transaction_amount)
         private val merchantAddress = itemView.findViewById<TextView>(R.id.transaction_date)
         private val container = itemView.findViewById<ConstraintLayout>(R.id.container)
+        private val map = itemView.findViewById<MapView>(R.id.map)
+        private val directionIcon = itemView.findViewById<ImageView>(R.id.direction_icon)
 
         fun bind(merchant: Merchant) {
+            directionIcon.visible()
             merchantName.text = merchant.contact_name
-            merchantEmail.text = merchant.email
-            merchantAddress.text = merchant.address
-            container.setOnClickListener { interaction?.onItemSelected(merchant) }
+            merchantEmail.text = merchant.ptsp
+            merchantAddress.text = merchant.slip_footer
+            directionIcon.setOnClickListener {
+                if (map.visibility == View.VISIBLE) {
+                    map.gone()
+                } else map.visible()
+            }
+            container.setOnClickListener { interaction?.onItemSelected(merchant, map) }
         }
     }
 
     interface Interaction {
-        fun onItemSelected(merchant: Merchant)
+        fun onItemSelected(merchant: Merchant, map: MapView)
     }
 }

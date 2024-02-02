@@ -11,8 +11,9 @@ import android.widget.Toast
 import androidx.appcompat.widget.AppCompatButton
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
-import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
+import com.netplus.coremechanism.backendRemote.model.qr.EncryptedQrModel
 import com.netplus.coremechanism.utils.decodeBase64ToBitmap
+import com.netplus.coremechanism.utils.decryptBase64
 import com.netplus.coremechanism.utils.gone
 import com.netplus.coremechanism.utils.saveImageToGallery
 import com.netplus.coremechanism.utils.visible
@@ -20,19 +21,19 @@ import com.netplus.tallyqrgeneratorui.R
 
 class TokenizedCardsAdapter(
     private val interaction: Interaction? = null,
-    private val generateQrcodeResponse: List<GenerateQrcodeResponse>
+    private val encryptedQrModel: List<EncryptedQrModel>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return TokenizedCardsViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.all_tokenized_card_items, parent, false), interaction)
     }
 
-    override fun getItemCount() = generateQrcodeResponse.size
+    override fun getItemCount() = encryptedQrModel.size
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is TokenizedCardsViewHolder -> {
-                holder.bind(generateQrcodeResponse[position], position)
+                holder.bind(encryptedQrModel[position], position)
             }
         }
     }
@@ -54,14 +55,19 @@ class TokenizedCardsAdapter(
         private var topConstraints = itemView.findViewById<ConstraintLayout>(R.id.top_constraint)
         private var bottomConstraint = itemView.findViewById<ConstraintLayout>(R.id.bottm_constraints)
         @SuppressLint("SetTextI18n")
-        fun bind(generateQrcodeResponse: GenerateQrcodeResponse, position: Int) {
+        fun bind(encryptedQrModel: EncryptedQrModel, position: Int) {
 
-            val qrBitmap = decodeBase64ToBitmap(generateQrcodeResponse.data?.substringAfter("data:image/png;base64,").toString())
+            val qrBitmap = decodeBase64ToBitmap(
+                decryptBase64(
+                    encryptedQrModel.image.toString(),
+                    encryptedQrModel.qrcodeId.toString()
+                ).substringAfter("data:image/png;base64,")
+            )
             smallImage.setImageBitmap(qrBitmap)
             tokenizedCardImage.setImageBitmap(qrBitmap)
-            bankName.text = generateQrcodeResponse.issuing_bank
-            bankAndSchemeName.text = "${generateQrcodeResponse.issuing_bank} ${generateQrcodeResponse.card_scheme}"
-            dateCreated.text = generateQrcodeResponse.date
+            bankName.text = encryptedQrModel.issuingBank
+            bankAndSchemeName.text = "${encryptedQrModel.issuingBank} ${encryptedQrModel.cardScheme}"
+            dateCreated.text = encryptedQrModel.date
 
             dropDownIcon.setOnClickListener {
                 TransitionManager.beginDelayedTransition(bottomConstraint)
@@ -85,7 +91,7 @@ class TokenizedCardsAdapter(
             }
 
             viewTransactions.setOnClickListener {
-                interaction?.onItemSelected(position, generateQrcodeResponse)
+                interaction?.onItemSelected(position, encryptedQrModel)
             }
         }
     }
@@ -93,7 +99,7 @@ class TokenizedCardsAdapter(
     interface Interaction{
         fun onItemSelected(
             absoluteAdapterPosition: Int,
-            generateQrcodeResponse: GenerateQrcodeResponse
+            encryptedQrModel: EncryptedQrModel
         )
     }
 }

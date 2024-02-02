@@ -1,5 +1,6 @@
 package com.netplus.coremechanism.mvvm
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.netplus.coremechanism.backendRemote.model.login.LoginResponse
 import com.netplus.coremechanism.backendRemote.model.merchants.AllMerchantResponse
@@ -7,7 +8,7 @@ import com.netplus.coremechanism.backendRemote.model.merchants.MerchantResponse
 import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
 import com.netplus.coremechanism.backendRemote.model.qr.retreive.GetTokenizedCardsResponse
 import com.netplus.coremechanism.backendRemote.model.qr.store.StoreTokenizedCardsResponse
-import com.netplus.coremechanism.backendRemote.model.transactions.Transaction
+import com.netplus.coremechanism.backendRemote.model.transactions.updatedTransaction.UpdatedTransactionResponse
 import com.netplus.coremechanism.backendRemote.responseManager.ApiResponseHandler
 
 /**
@@ -16,6 +17,8 @@ import com.netplus.coremechanism.backendRemote.responseManager.ApiResponseHandle
  * @property tallyRepository An instance of [TallyRepository] for interacting with Tally API.
  */
 class TallyViewModel(private val tallyRepository: TallyRepository) : ViewModel() {
+
+    val recentGeneratedQrLiveData = MutableLiveData<GenerateQrcodeResponse>()
 
     /**
      * Initiates the user login process.
@@ -113,11 +116,11 @@ class TallyViewModel(private val tallyRepository: TallyRepository) : ViewModel()
      * @param callback The callback for handling API response
      */
     fun getTransactions(
-        qrcodeId: List<String>,
+        qr_code_ids: List<String>,
         page: Int,
         pageSize: Int,
-        callback: ApiResponseHandler.Callback<List<Transaction>>
-    ) = tallyRepository.getTransactions(qrcodeId, page, pageSize, callback)
+        callback: ApiResponseHandler.Callback<UpdatedTransactionResponse>
+    ) = tallyRepository.getTransactions(qr_code_ids, page, pageSize, callback)
 
     /**
      * Get selected merchant with the provided information
@@ -145,9 +148,16 @@ class TallyViewModel(private val tallyRepository: TallyRepository) : ViewModel()
      * @param callback The callback for handling API response
      */
     fun getAllMerchant(
+        url: String,
         token: String,
         limit: Int,
         page: Int,
         callback: ApiResponseHandler.Callback<AllMerchantResponse>
-    ) = tallyRepository.getAllMerchant(token, limit, page, callback)
+    ) = tallyRepository.getAllMerchant(url, token, limit, page, callback)
+
+    fun transferGeneratedQrData(generateQrcodeResponse: GenerateQrcodeResponse?) {
+        recentGeneratedQrLiveData.value = generateQrcodeResponse
+    }
+
+    fun receiveTransferredGeneratedQrData() = recentGeneratedQrLiveData
 }

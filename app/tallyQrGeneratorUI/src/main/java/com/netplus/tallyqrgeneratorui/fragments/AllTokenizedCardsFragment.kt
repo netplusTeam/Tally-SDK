@@ -8,7 +8,7 @@ import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
+import com.netplus.coremechanism.backendRemote.model.qr.EncryptedQrModel
 import com.netplus.coremechanism.utils.TallSecurityUtil
 import com.netplus.coremechanism.utils.gone
 import com.netplus.coremechanism.utils.launchActivity
@@ -16,12 +16,19 @@ import com.netplus.coremechanism.utils.visible
 import com.netplus.tallyqrgeneratorui.R
 import com.netplus.tallyqrgeneratorui.activities.SingleQrTransactionsActivity
 import com.netplus.tallyqrgeneratorui.adapters.TokenizedCardsAdapter
+import com.netplus.tallyqrgeneratorui.utils.ProgressDialogUtil
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class AllTokenizedCardsFragment : Fragment(), TokenizedCardsAdapter.Interaction {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var tokenizedCardsAdapter: TokenizedCardsAdapter
     private lateinit var qrInfoLayout: LinearLayout
+    private val progressDialogUtil by lazy { ProgressDialogUtil(requireContext()) }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -34,35 +41,44 @@ class AllTokenizedCardsFragment : Fragment(), TokenizedCardsAdapter.Interaction 
         return rootView
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        initRecycler()
+    }
+
     private fun initViews(rootView: View) {
         recyclerView = rootView.findViewById(R.id.tokenized_cards_recycle)
         qrInfoLayout = rootView.findViewById(R.id.token_info_layout)
     }
 
-    override fun onResume() {
-        super.onResume()
-        initRecycler()
-    }
-
+    @OptIn(DelicateCoroutinesApi::class)
     private fun initRecycler() {
-        val tokenizedCardsData = TallSecurityUtil.retrieveData(requireContext())
-        if (tokenizedCardsData?.isEmpty() == true) {
-            switchViewVisibility(true)
-        } else switchViewVisibility(false)
+        //progressDialogUtil.showProgressDialog("Loading...")
 
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        tokenizedCardsAdapter = TokenizedCardsAdapter(this, tokenizedCardsData ?: emptyList())
-        recyclerView.apply {
-            adapter = tokenizedCardsAdapter
+        GlobalScope.launch(Dispatchers.IO) {
+            val tokenizedCardsData = TallSecurityUtil.retrieveData(requireContext())
+            withContext(Dispatchers.Main) {
+                if (tokenizedCardsData?.isEmpty() == true) {
+                    switchViewVisibility(true)
+                } else switchViewVisibility(false)
+
+                recyclerView.layoutManager = LinearLayoutManager(requireContext())
+                tokenizedCardsAdapter = TokenizedCardsAdapter(this@AllTokenizedCardsFragment, tokenizedCardsData ?: emptyList())
+                recyclerView.apply {
+                    adapter = tokenizedCardsAdapter
+                }
+                //progressDialogUtil.dismissProgressDialog()
+            }
         }
     }
 
     override fun onItemSelected(
         absoluteAdapterPosition: Int,
-        generateQrcodeResponse: GenerateQrcodeResponse
+        encryptedQrModel: EncryptedQrModel
     ) {
         requireActivity().launchActivity<SingleQrTransactionsActivity> {
-            putExtra("qrc ode_id", generateQrcodeResponse.qr_code_id)
+            putExtra("qrcode_id", encryptedQrModel.qrcodeId)
         }
     }
 
@@ -74,5 +90,15 @@ class AllTokenizedCardsFragment : Fragment(), TokenizedCardsAdapter.Interaction 
             qrInfoLayout.gone()
             recyclerView.visible()
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        progressDialogUtil.dismissProgressDialog()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        progressDialogUtil.dismissProgressDialog()
     }
 }

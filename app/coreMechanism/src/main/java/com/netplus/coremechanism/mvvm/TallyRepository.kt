@@ -11,9 +11,13 @@ import com.netplus.coremechanism.backendRemote.model.qr.QrcodeIds
 import com.netplus.coremechanism.backendRemote.model.qr.retreive.GetTokenizedCardsResponse
 import com.netplus.coremechanism.backendRemote.model.qr.store.StoreTokenizedCardsPayload
 import com.netplus.coremechanism.backendRemote.model.qr.store.StoreTokenizedCardsResponse
-import com.netplus.coremechanism.backendRemote.model.transactions.Transaction
+import com.netplus.coremechanism.backendRemote.model.transactions.updatedTransaction.UpdatedTransactionResponse
 import com.netplus.coremechanism.backendRemote.responseManager.ApiResponseHandler
 import com.netplus.coremechanism.backendRemote.responseManager.ErrorMapper
+import com.netplus.coremechanism.utils.QR_AUTH_BASE_URL
+import com.netplus.coremechanism.utils.QR_ENGINE_BASE_URL
+import com.netplus.coremechanism.utils.TOKEN
+import com.netplus.coremechanism.utils.TRANSACTIONS_BASE_URL
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -42,20 +46,24 @@ class TallyRepository(private val tallyEndpoints: TallyEndpoints) {
     ) {
         val apiResponseHandler = ApiResponseHandler<LoginResponse>()
         val loginPayload = LoginPayload(email, password)
-        tallyEndpoints.login(loginPayload).enqueue(object : Callback<LoginResponse> {
-            override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
-                if (response.isSuccessful) {
-                    apiResponseHandler.handleResponse(response.body(), null, callback)
-                } else {
-                    val error = errorMapper.parseErrorMessage(response.errorBody())
-                    apiResponseHandler.handleResponse(null, error?.message, callback)
+        tallyEndpoints.login("$QR_AUTH_BASE_URL/auth/login", loginPayload)
+            .enqueue(object : Callback<LoginResponse> {
+                override fun onResponse(
+                    call: Call<LoginResponse>,
+                    response: Response<LoginResponse>
+                ) {
+                    if (response.isSuccessful) {
+                        apiResponseHandler.handleResponse(response.body(), null, callback)
+                    } else {
+                        val error = errorMapper.parseErrorMessage(response.errorBody())
+                        apiResponseHandler.handleResponse(null, error?.message, callback)
+                    }
                 }
-            }
 
-            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
-                apiResponseHandler.handleResponse(null, t.message, callback)
-            }
-        })
+                override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                    apiResponseHandler.handleResponse(null, t.message, callback)
+                }
+            })
     }
 
     /**
@@ -101,7 +109,7 @@ class TallyRepository(private val tallyEndpoints: TallyEndpoints) {
             appCode,
             cardPin
         )
-        tallyEndpoints.generateQrcode(generateQrPayload)
+        tallyEndpoints.generateQrcode("$QR_AUTH_BASE_URL/qr", TOKEN, generateQrPayload)
             .enqueue(object : Callback<GenerateQrcodeResponse> {
                 override fun onResponse(
                     call: Call<GenerateQrcodeResponse>,
@@ -143,23 +151,27 @@ class TallyRepository(private val tallyEndpoints: TallyEndpoints) {
             cardScheme, email, issuingBank, qrCodeId, qrToken
         )
         val apiResponseHandler = ApiResponseHandler<StoreTokenizedCardsResponse>()
-        tallyEndpoints.storeTokenizedCards(storeTokenizedCardsPayload).enqueue(object : Callback<StoreTokenizedCardsResponse>{
-            override fun onResponse(
-                call: Call<StoreTokenizedCardsResponse>,
-                response: Response<StoreTokenizedCardsResponse>
-            ) {
-                if (response.isSuccessful) {
-                    apiResponseHandler.handleResponse(response.body(), null, callback)
-                } else {
-                    val error = errorMapper.parseErrorMessage(response.errorBody())
-                    apiResponseHandler.handleResponse(null, error?.message, callback)
+        tallyEndpoints.storeTokenizedCards(
+            "$QR_ENGINE_BASE_URL/storeQrInfo",
+            TOKEN, storeTokenizedCardsPayload
+        )
+            .enqueue(object : Callback<StoreTokenizedCardsResponse> {
+                override fun onResponse(
+                    call: Call<StoreTokenizedCardsResponse>,
+                    response: Response<StoreTokenizedCardsResponse>
+                ) {
+                    if (response.isSuccessful) {
+                        apiResponseHandler.handleResponse(response.body(), null, callback)
+                    } else {
+                        val error = errorMapper.parseErrorMessage(response.errorBody())
+                        apiResponseHandler.handleResponse(null, error?.message, callback)
+                    }
                 }
-            }
 
-            override fun onFailure(call: Call<StoreTokenizedCardsResponse>, t: Throwable) {
-                apiResponseHandler.handleResponse(null, t.message, callback)
-            }
-        })
+                override fun onFailure(call: Call<StoreTokenizedCardsResponse>, t: Throwable) {
+                    apiResponseHandler.handleResponse(null, t.message, callback)
+                }
+            })
     }
 
     /**
@@ -196,18 +208,23 @@ class TallyRepository(private val tallyEndpoints: TallyEndpoints) {
      * @param callback The callback for handling API response
      */
     fun getTransactions(
-        qrcodeId: List<String>,
+        qr_code_id: List<String>,
         page: Int,
         pageSize: Int,
-        callback: ApiResponseHandler.Callback<List<Transaction>>
+        callback: ApiResponseHandler.Callback<UpdatedTransactionResponse>
     ) {
-        val qrcodeIds = QrcodeIds(qrcodeId)
-        val apiResponseHandler = ApiResponseHandler<List<Transaction>>()
-        tallyEndpoints.getTransactions(qrcodeIds, page, pageSize)
-            .enqueue(object : Callback<List<Transaction>> {
+        val qr_code_ids = QrcodeIds(qr_code_id)
+        val apiResponseHandler = ApiResponseHandler<UpdatedTransactionResponse>()
+        tallyEndpoints.getTransactions(
+            "$TRANSACTIONS_BASE_URL/multiple-qrcode-transactions/",
+            qr_code_ids,
+            page,
+            pageSize
+        )
+            .enqueue(object : Callback<UpdatedTransactionResponse> {
                 override fun onResponse(
-                    call: Call<List<Transaction>>,
-                    response: Response<List<Transaction>>
+                    call: Call<UpdatedTransactionResponse>,
+                    response: Response<UpdatedTransactionResponse>
                 ) {
                     if (response.isSuccessful) {
                         apiResponseHandler.handleResponse(response.body(), null, callback)
@@ -217,7 +234,7 @@ class TallyRepository(private val tallyEndpoints: TallyEndpoints) {
                     }
                 }
 
-                override fun onFailure(call: Call<List<Transaction>>, t: Throwable) {
+                override fun onFailure(call: Call<UpdatedTransactionResponse>, t: Throwable) {
                     apiResponseHandler.handleResponse(null, t.message, callback)
                 }
             })
@@ -269,13 +286,14 @@ class TallyRepository(private val tallyEndpoints: TallyEndpoints) {
      * @param callback The callback for handling API response
      */
     fun getAllMerchant(
+        url: String,
         token: String,
         limit: Int,
         page: Int,
         callback: ApiResponseHandler.Callback<AllMerchantResponse>
     ) {
         val apiResponseHandler = ApiResponseHandler<AllMerchantResponse>()
-        tallyEndpoints.getAllMerchant(token, limit, page)
+        tallyEndpoints.getAllMerchant(url, token, limit, page)
             .enqueue(object : Callback<AllMerchantResponse> {
                 override fun onResponse(
                     call: Call<AllMerchantResponse>,

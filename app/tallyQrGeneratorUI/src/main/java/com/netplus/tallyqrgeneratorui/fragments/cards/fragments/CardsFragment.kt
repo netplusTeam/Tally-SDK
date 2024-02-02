@@ -1,5 +1,6 @@
 package com.netplus.tallyqrgeneratorui.fragments.cards.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -13,14 +14,15 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.netplus.coremechanism.backendRemote.model.qr.EncryptedQrModel
 import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
 import com.netplus.coremechanism.backendRemote.model.qr.store.StoreTokenizedCardsResponse
 import com.netplus.coremechanism.utils.TallSecurityUtil
-import com.netplus.coremechanism.utils.TallyAppPreferences
-import com.netplus.coremechanism.utils.TallyCustomProgressDialog
 import com.netplus.coremechanism.utils.TallyQrcodeGenerator
 import com.netplus.coremechanism.utils.TallyResponseCallback
+import com.netplus.coremechanism.utils.encryptBase64
 import com.netplus.coremechanism.utils.formatCardNumber
 import com.netplus.coremechanism.utils.getCardType
 import com.netplus.coremechanism.utils.gone
@@ -30,12 +32,13 @@ import com.netplus.coremechanism.utils.listOfCardSchemes
 import com.netplus.coremechanism.utils.setEditTextListener
 import com.netplus.coremechanism.utils.visible
 import com.netplus.tallyqrgeneratorui.R
+import com.netplus.tallyqrgeneratorui.utils.ProgressDialogUtil
 
 
 class CardsFragment : Fragment() {
 
     private val tallyQrcodeGenerator = TallyQrcodeGenerator()
-    private val tallyCustomProgressDialog by lazy { TallyCustomProgressDialog(requireContext()) }
+    private val progressDialogUtil by lazy { ProgressDialogUtil(requireContext()) }
     private lateinit var pinBottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
     private lateinit var cardNumber: AppCompatEditText
     private lateinit var cardExpiryMonth: AppCompatEditText
@@ -49,6 +52,7 @@ class CardsFragment : Fragment() {
     private lateinit var secondPin: AppCompatEditText
     private lateinit var thirdPin: AppCompatEditText
     private lateinit var forthPin: AppCompatEditText
+    private var generateQrcodeResponse: GenerateQrcodeResponse? = null
 
     private var userId: Int? = null
     private var email: String? = null
@@ -80,9 +84,7 @@ class CardsFragment : Fragment() {
         forthPin = rootView.findViewById(R.id.pin_four)
 
         initView()
-
         clickEvents()
-
         setUpBottomSheet()
 
         return rootView
@@ -174,7 +176,7 @@ class CardsFragment : Fragment() {
                         userId = 12
                         email = "nicholasanyanwu125@gmail.com"
                         fullName = "Nicholas"
-                        issuingBank = "Wema"
+                        issuingBank = "Access Bank"
                         mobilePhone = "09090909090"
                         appCode = "Tall"
                         cardScheme = cardType
@@ -194,7 +196,7 @@ class CardsFragment : Fragment() {
                         userId = 12
                         email = "nicholasanyanwu125@gmail.com"
                         fullName = "Nicholas"
-                        issuingBank = "Wema"
+                        issuingBank = "GTCO"
                         mobilePhone = "09090909090"
                         appCode = "Tall"
                         cardScheme = cardType
@@ -211,9 +213,7 @@ class CardsFragment : Fragment() {
     }
 
     private fun generateQrcode(isPinInputted: Boolean) {
-        tallyCustomProgressDialog.show()
-        tallyCustomProgressDialog.setUpdateText("Generating Qrcode...")
-
+        progressDialogUtil.showProgressDialog("Tokenizing card...")
         val cardExpiry = buildString {
             append(cardExpiryMonth.text.toString())
             append(cardExpiryYear.text.toString())
@@ -232,17 +232,17 @@ class CardsFragment : Fragment() {
             cardPin = (if (isPinInputted) cardPin else null) ?: "",
             object : TallyResponseCallback<GenerateQrcodeResponse> {
                 override fun success(data: GenerateQrcodeResponse?) {
-                    storeTokenizedCard(data)
+                    generateQrcodeResponse = data
+                    //storeTokenizedCard(data)
                     encryptQrToken(data)
                     hideBottomSheet()
-                    saveResults(data)
                     clearForm()
                 }
 
                 override fun failed(message: String?) {
-                    tallyCustomProgressDialog.setUpdateText(message.toString())
+                   progressDialogUtil.showProgressDialog(message.toString())
                     Handler(Looper.getMainLooper()).postDelayed({
-                        tallyCustomProgressDialog.dismiss()
+                       progressDialogUtil.dismissProgressDialog()
                     }, 2000)
                 }
             })
@@ -257,16 +257,15 @@ class CardsFragment : Fragment() {
             qrToken = data?.data ?: "",
             object : TallyResponseCallback<StoreTokenizedCardsResponse> {
                 override fun success(data: StoreTokenizedCardsResponse?) {
-                    tallyCustomProgressDialog.setUpdateText("Generating successful...")
                     Handler(Looper.getMainLooper()).postDelayed({
-                        tallyCustomProgressDialog.dismiss()
+                       progressDialogUtil.dismissProgressDialog()
                     }, 2000)
                 }
 
                 override fun failed(message: String?) {
-                    tallyCustomProgressDialog.setUpdateText(message.toString())
+                    progressDialogUtil.showProgressDialog(message.toString())
                     Handler(Looper.getMainLooper()).postDelayed({
-                        tallyCustomProgressDialog.dismiss()
+                        progressDialogUtil.dismissProgressDialog()
                     }, 2000)
                 }
             })
@@ -274,7 +273,21 @@ class CardsFragment : Fragment() {
 
     private fun encryptQrToken(data: GenerateQrcodeResponse?) {
         if (data != null) {
-            TallSecurityUtil.storeData(requireContext(), data)
+            Toast.makeText(requireContext(), "Card tokenization complete", Toast.LENGTH_SHORT).show()
+            val encryptedQrModel = EncryptedQrModel(
+                qrcodeId = data.qr_code_id,
+                image = encryptBase64(data.data.toString(), data.qr_code_id.toString()),
+                success = data.success,
+                cardScheme = data.card_scheme,
+                issuingBank = data.issuing_bank,
+                date = data.date
+            )
+            progressDialogUtil.dismissProgressDialog()
+            TallSecurityUtil.storeData(requireContext(), encryptedQrModel)
+            val intent = Intent("swipeAction").apply {
+                putExtra("generateQrcodeResponse", data)
+            }
+            LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(intent)
         }
     }
 
@@ -283,17 +296,6 @@ class CardsFragment : Fragment() {
         cardExpiryYear.text?.clear()
         cardExpiryMonth.text?.clear()
         cardCvv.text?.clear()
-    }
-
-    private fun saveResults(data: GenerateQrcodeResponse?) {
-        TallyAppPreferences.getInstance(requireContext())
-            .setStringValue(TallyAppPreferences.QRCODE_IMAGE, data?.data ?: "")
-        TallyAppPreferences.getInstance(requireContext()).setStringValue(
-            TallyAppPreferences.CARD_AND_BANK_SCHEME,
-            "${data?.issuing_bank} ${data?.card_scheme}"
-        )
-        TallyAppPreferences.getInstance(requireContext())
-            .setStringValue(TallyAppPreferences.DATE_GENERATED, data?.date ?: "")
     }
 
     private fun setUpBottomSheet() {
@@ -328,5 +330,15 @@ class CardsFragment : Fragment() {
         thirdPin.text?.clear()
         forthPin.text?.clear()
         pinBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+    }
+
+    override fun onPause() {
+        super.onPause()
+        progressDialogUtil.dismissProgressDialog()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        progressDialogUtil.dismissProgressDialog()
     }
 }

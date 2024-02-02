@@ -1,5 +1,7 @@
 package com.netplus.coremechanism.backendRemote.model.qr
 
+import java.io.Serializable
+
 data class GenerateQrcodeResponse(
     val qr_code_id: String?,
     val data: String?,
@@ -7,4 +9,4 @@ data class GenerateQrcodeResponse(
     val card_scheme: String?,
     val issuing_bank: String?,
     val date: String? = null
-)
+): Serializable

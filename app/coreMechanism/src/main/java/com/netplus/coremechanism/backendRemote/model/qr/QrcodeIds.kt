@@ -1,5 +1,5 @@
 package com.netplus.coremechanism.backendRemote.model.qr
 
 data class QrcodeIds(
-    val qrcodeIds: List<String>
+    val qr_code_ids: List<String>
 )

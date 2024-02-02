@@ -1,7 +1,7 @@
 package com.netplus.tallyqrgeneratorui.fragments
 
 import android.os.Bundle
-import android.util.Log
+import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,12 +12,19 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.netplus.coremechanism.backendRemote.model.merchants.AllMerchantResponse
 import com.netplus.coremechanism.backendRemote.model.merchants.Merchant
+import com.netplus.coremechanism.utils.MERCHANTS_BASE_URL
+import com.netplus.coremechanism.utils.TOKEN
 import com.netplus.coremechanism.utils.TallyQrcodeGenerator
 import com.netplus.coremechanism.utils.TallyResponseCallback
 import com.netplus.coremechanism.utils.gone
 import com.netplus.coremechanism.utils.visible
 import com.netplus.tallyqrgeneratorui.R
 import com.netplus.tallyqrgeneratorui.adapters.AllMerchantAdapter
+import com.netplus.tallyqrgeneratorui.utils.ProgressDialogUtil
+import org.osmdroid.config.Configuration
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 
 class TallyMerchantsFragment : Fragment(), AllMerchantAdapter.Interaction {
 
@@ -25,6 +32,7 @@ class TallyMerchantsFragment : Fragment(), AllMerchantAdapter.Interaction {
     private lateinit var allMerchantAdapter: AllMerchantAdapter
     private val tallyQrcodeGenerator = TallyQrcodeGenerator()
     private lateinit var qrInfoLayout: LinearLayout
+    private val progressDialogUtil by lazy { ProgressDialogUtil(requireContext()) }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,6 +49,16 @@ class TallyMerchantsFragment : Fragment(), AllMerchantAdapter.Interaction {
         return rootView
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Initialize and configure the map
+        Configuration.getInstance().load(
+            requireContext().applicationContext,
+            PreferenceManager.getDefaultSharedPreferences(requireContext())
+        )
+    }
+
     private fun initView() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
     }
@@ -51,13 +69,15 @@ class TallyMerchantsFragment : Fragment(), AllMerchantAdapter.Interaction {
     }
 
     private fun observer() {
+        progressDialogUtil.showProgressDialog("Loading...")
         tallyQrcodeGenerator.getAllMerchants(
-            token = "",
-            limit = 1,
-            page = 10,
+            url = MERCHANTS_BASE_URL,
+            token = TOKEN,
+            limit = 20,
+            page = 1,
             object : TallyResponseCallback<AllMerchantResponse> {
                 override fun success(data: AllMerchantResponse?) {
-                    Log.e("MERCHANT", "success: $data")
+                    progressDialogUtil.dismissProgressDialog()
                     if (data?.data?.isEmpty() == true) {
                         switchViewVisibility(isListEmpty = true)
                     } else {
@@ -71,14 +91,29 @@ class TallyMerchantsFragment : Fragment(), AllMerchantAdapter.Interaction {
                 }
 
                 override fun failed(message: String?) {
+                    progressDialogUtil.dismissProgressDialog()
                     Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                 }
             }
         )
     }
 
-    override fun onItemSelected(merchant: Merchant) {
+    override fun onItemSelected(merchant: Merchant, map: MapView) {
+        showAddressOnMap(map)
+    }
 
+    private fun showAddressOnMap(map: MapView) {
+        val geoPoint = GeoPoint(6.4550575, 3.3941795)
+
+        // Set the map to zoom in to the location
+        val mapController = map.controller
+        mapController.setZoom(20.0)  // Adjust this value as needed for the desired zoom level
+        mapController.setCenter(geoPoint)
+
+        val marker = Marker(map)
+        marker.position = geoPoint
+        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        map.overlays.add(marker)
     }
 
     private fun switchViewVisibility(isListEmpty: Boolean) {
@@ -89,5 +124,15 @@ class TallyMerchantsFragment : Fragment(), AllMerchantAdapter.Interaction {
             recyclerView.visible()
             qrInfoLayout.gone()
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        progressDialogUtil.dismissProgressDialog()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        progressDialogUtil.dismissProgressDialog()
     }
 }

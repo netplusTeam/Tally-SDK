@@ -6,7 +6,6 @@ import com.netplus.coremechanism.internet.handler.InternetConfigViewModel
 import com.netplus.coremechanism.mvvm.TallyRepository
 import com.netplus.coremechanism.mvvm.TallyViewModel
 import com.netplus.coremechanism.utils.TallyAppPreferences
-import com.netplus.coremechanism.utils.TOKEN
 import okhttp3.OkHttpClient
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -56,7 +55,7 @@ class KoinApp : Application() {
                     connectTimeout(30, TimeUnit.SECONDS)
                     addInterceptor { chain ->
                         val request = chain.request().newBuilder()
-                            .addHeader("token", TOKEN).build()
+                            /*.addHeader("token", TOKEN)*/.build()
                         chain.proceed(request)
                     }
                 }.build()

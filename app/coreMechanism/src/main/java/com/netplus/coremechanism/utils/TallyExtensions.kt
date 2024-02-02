@@ -18,16 +18,24 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import androidx.appcompat.widget.AppCompatEditText
-import com.netplus.coremechanism.backendRemote.model.qr.GenerateQrcodeResponse
+import com.netplus.coremechanism.backendRemote.model.qr.EncryptedQrModel
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.OutputStream
+import java.security.Key
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
+import java.util.TimeZone
 import java.util.regex.Pattern
+import javax.crypto.Cipher
+import javax.crypto.SecretKeyFactory
+import javax.crypto.spec.PBEKeySpec
+import javax.crypto.spec.SecretKeySpec
 
 val listOfCardSchemes = listOf("Visa", "MasterCard", "American Express", "Discover", "Verve")
 
@@ -240,6 +248,51 @@ inline fun <reified T : Any> Activity.extra(key: String, default: T? = null) = l
     if (value is T) value else default
 }
 
-fun extractQrCodeIds(dataList: List<GenerateQrcodeResponse>): List<String> {
-    return dataList.map { it.qr_code_id.toString() }
+fun extractQrCodeIds(dataList: List<EncryptedQrModel>): List<String> {
+    return dataList.map { it.qrcodeId.toString() }
+}
+
+fun encryptBase64(input: String, secretKey: String): String {
+    try {
+        val key = generateKey(secretKey)
+        val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
+        cipher.init(Cipher.ENCRYPT_MODE, key)
+        val encryptedBytes = cipher.doFinal(input.toByteArray())
+        return Base64.encodeToString(encryptedBytes, Base64.NO_WRAP)
+    } catch (e: Exception) {
+        throw RuntimeException("Error encrypting: ${e.message}")
+    }
+}
+
+fun decryptBase64(input: String, secretKey: String): String {
+    try {
+        val key = generateKey(secretKey)
+        val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
+        cipher.init(Cipher.DECRYPT_MODE, key)
+        val decodedBytes = Base64.decode(input, Base64.NO_WRAP)
+        val decryptedBytes = cipher.doFinal(decodedBytes)
+        return String(decryptedBytes)
+    } catch (e: Exception) {
+        throw RuntimeException("Error decrypting: ${e.message}")
+    }
+}
+
+private fun generateKey(password: String): Key {
+    val salt = ByteArray(16) // Should be securely generated and stored
+    val iterationCount = 65536
+    val keyLength = 256
+    val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
+    val spec = PBEKeySpec(password.toCharArray(), salt, iterationCount, keyLength)
+    return SecretKeySpec(factory.generateSecret(spec).encoded, "AES")
+}
+
+fun convertDateToReadableFormat(dateStr: String): String {
+    val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+    inputFormat.timeZone = TimeZone.getTimeZone("UTC")
+
+    val outputFormat = SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale.getDefault())
+    outputFormat.timeZone = TimeZone.getDefault() // Or specify a particular timezone if needed
+
+    val date = inputFormat.parse(dateStr)
+    return outputFormat.format(date)
 }

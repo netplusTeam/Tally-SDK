@@ -10,8 +10,8 @@ import com.netplus.coremechanism.backendRemote.model.qr.QrcodeIds
 import com.netplus.coremechanism.backendRemote.model.qr.retreive.GetTokenizedCardsResponse
 import com.netplus.coremechanism.backendRemote.model.qr.store.StoreTokenizedCardsPayload
 import com.netplus.coremechanism.backendRemote.model.qr.store.StoreTokenizedCardsResponse
-import com.netplus.coremechanism.backendRemote.model.transactions.Transaction
 import com.netplus.coremechanism.backendRemote.model.transactions.TransactionResponse
+import com.netplus.coremechanism.backendRemote.model.transactions.updatedTransaction.UpdatedTransactionResponse
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -19,6 +19,7 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.Url
 
 /**
  * Interface defining API endpoints for Tally authentication and QR code generation.
@@ -31,8 +32,8 @@ interface TallyEndpoints {
      * @param loginPayload The payload containing user credentials.
      * @return A [Call] object wrapping the [LoginResponse].
      */
-    @POST("auth/login")
-    fun login(@Body loginPayload: LoginPayload): Call<LoginResponse>
+    @POST
+    fun login(@Url url: String, @Body loginPayload: LoginPayload): Call<LoginResponse>
 
     /**
      * Sends a [POST] request to generate a QR code.
@@ -40,16 +41,24 @@ interface TallyEndpoints {
      * @param generateQrPayload The payload containing data for QR code generation.
      * @return A [Call] object wrapping the [GenerateQrcodeResponse].
      */
-    @POST("qr")
-    fun generateQrcode(@Body generateQrPayload: GenerateQrPayload): Call<GenerateQrcodeResponse>
+    @POST
+    fun generateQrcode(
+        @Url url: String,
+        @Header("token") token: String,
+        @Body generateQrPayload: GenerateQrPayload
+    ): Call<GenerateQrcodeResponse>
 
     /**
      * Sends a [POST] request to store user tokenized card info
      * @param storeTokenizedCardsPayload
      * @return A [Call] object wrapping the [StoreTokenizedCardsResponse]
      */
-    @POST("storeQrInfo")
-    fun storeTokenizedCards(@Body storeTokenizedCardsPayload: StoreTokenizedCardsPayload): Call<StoreTokenizedCardsResponse>
+    @POST
+    fun storeTokenizedCards(
+        @Url url: String,
+        @Header("token") token: String,
+        @Body storeTokenizedCardsPayload: StoreTokenizedCardsPayload
+    ): Call<StoreTokenizedCardsResponse>
 
     /**
      * Sends a [GET] request to retrieve all store qr tokens
@@ -66,12 +75,13 @@ interface TallyEndpoints {
      * @param pageSize
      * @return A [Call] object wrapping the [TransactionResponse].
      */
-    @POST("multiple-qrcode-transactions/")
+    @POST
     fun getTransactions(
-        @Body qrcodeIds: QrcodeIds,
+        @Url url: String,
+        @Body qr_code_ids: QrcodeIds,
         @Query("page") page: Int,
         @Query("pageSize") pageSize: Int
-    ): Call<List<Transaction>>
+    ): Call<UpdatedTransactionResponse>
 
     @GET("qrcode_transactions/{qr_code_id}")
     fun getAllTransaction(
@@ -103,8 +113,9 @@ interface TallyEndpoints {
      * @param limit
      * @param page
      */
-    @GET("user/get-partner-user")
+    @GET
     fun getAllMerchant(
+        @Url url: String,
         @Header("token") token: String,
         @Query("limit") limit: Int,
         @Query("page") page: Int
