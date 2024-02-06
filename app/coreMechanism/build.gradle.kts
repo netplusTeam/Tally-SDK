@@ -3,6 +3,9 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+group = "com.netplus.tallyqrgeneratorui"
+version = "1.0.0"
+
 android {
     namespace = "com.netplus.coremechanism"
     compileSdk = 34

@@ -6,6 +6,9 @@ plugins {
     id("maven-publish")
 }
 
+group = "com.netplus.tallyqrgeneratorui"
+version = "1.0.0"
+
 android {
     namespace = "com.netplus.tallyqrgeneratorui"
     compileSdk = 34
