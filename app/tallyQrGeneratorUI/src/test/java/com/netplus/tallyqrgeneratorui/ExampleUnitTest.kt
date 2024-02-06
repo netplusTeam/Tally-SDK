@@ -26,7 +26,7 @@ class ExampleUnitTest {
             val cardScheme = getCardScheme(cardNumber)
             println("Card Type: $cardType\nCard Scheme: $cardScheme")
         } else {
-           println("Invalid card")
+            println("Invalid card")
         }
     }
 }

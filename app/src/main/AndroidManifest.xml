@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.netplus.tallyqrgeneratorui.activities.TallyActivity"/>
+        <activity android:name="com.netplus.tallyqrgeneratorui.activities.TallyActivity" />
     </application>
 
 </manifest>

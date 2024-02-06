@@ -7,7 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.netplus.tallyqrgeneratorui.R
 
-class ProgressDialogUtil (private val context: Context) {
+class ProgressDialogUtil(private val context: Context) {
     private var progressDialog: Dialog? = null
 
     fun showProgressDialog(message: String) {

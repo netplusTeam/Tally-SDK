@@ -27,12 +27,12 @@ class TallyAppPreferences private constructor(context: Context) {
         }
     }
 
-    fun setStringValue(key:String, value: String) {
+    fun setStringValue(key: String, value: String) {
         editor.putString(key, value)
         editor.apply()
     }
 
-    fun getStringValue(key:String) = sharedPreferences.getString(key, "")
+    fun getStringValue(key: String) = sharedPreferences.getString(key, "")
 
     fun setBooleanValue(key: String, value: Boolean) {
         editor.putBoolean(key, value)

@@ -154,7 +154,8 @@ class TallyQrcodeGenerator : AppCompatActivity() {
      * @param callback
      */
     fun getStoredTokenizedCards(callback: TallyResponseCallback<GetTokenizedCardsResponse>) {
-        tallyViewModel.getStoredTokenizedCards(object : ApiResponseHandler.Callback<GetTokenizedCardsResponse>{
+        tallyViewModel.getStoredTokenizedCards(object :
+            ApiResponseHandler.Callback<GetTokenizedCardsResponse> {
             override fun onSuccess(data: GetTokenizedCardsResponse?) {
                 callback.success(data = data)
             }

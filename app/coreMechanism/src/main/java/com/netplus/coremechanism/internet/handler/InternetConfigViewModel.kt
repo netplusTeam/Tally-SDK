@@ -13,11 +13,12 @@ import kotlinx.coroutines.launch
  * @see InternetConnectivityConfig
  * This function handles getting network state result and updating the UI
  */
-class InternetConfigViewModel:  ViewModel() {
+class InternetConfigViewModel : ViewModel() {
 
     companion object {
         var internetConnectivityConfig: InternetConnectivityConfig? = null
-        var internetConfigObject: MutableLiveData<InternetConnectionHandler<InternetConfigObject>>? = null
+        var internetConfigObject: MutableLiveData<InternetConnectionHandler<InternetConfigObject>>? =
+            null
     }
 
     fun networkState(context: Context): MutableLiveData<InternetConnectionHandler<InternetConfigObject>>? {

@@ -9,4 +9,4 @@ data class GenerateQrcodeResponse(
     val card_scheme: String?,
     val issuing_bank: String?,
     val date: String? = null
-): Serializable
+) : Serializable

@@ -64,7 +64,10 @@ class AllTokenizedCardsFragment : Fragment(), TokenizedCardsAdapter.Interaction 
                 } else switchViewVisibility(false)
 
                 recyclerView.layoutManager = LinearLayoutManager(requireContext())
-                tokenizedCardsAdapter = TokenizedCardsAdapter(this@AllTokenizedCardsFragment, tokenizedCardsData ?: emptyList())
+                tokenizedCardsAdapter = TokenizedCardsAdapter(
+                    this@AllTokenizedCardsFragment,
+                    tokenizedCardsData ?: emptyList()
+                )
                 recyclerView.apply {
                     adapter = tokenizedCardsAdapter
                 }

@@ -25,7 +25,10 @@ class TokenizedCardsAdapter(
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return TokenizedCardsViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.all_tokenized_card_items, parent, false), interaction)
+        return TokenizedCardsViewHolder(
+            LayoutInflater.from(parent.context)
+                .inflate(R.layout.all_tokenized_card_items, parent, false), interaction
+        )
     }
 
     override fun getItemCount() = encryptedQrModel.size
@@ -41,7 +44,7 @@ class TokenizedCardsAdapter(
     class TokenizedCardsViewHolder(
         itemView: View,
         private val interaction: Interaction?
-    ): RecyclerView.ViewHolder(itemView) {
+    ) : RecyclerView.ViewHolder(itemView) {
 
         private var smallImage = itemView.findViewById<ImageView>(R.id.small_card_image_view)
         private var tokenizedCardImage = itemView.findViewById<ImageView>(R.id.tokenized_card_image)
@@ -51,9 +54,12 @@ class TokenizedCardsAdapter(
         private var bankName = itemView.findViewById<TextView>(R.id.bank_name)
         private var bankAndSchemeName = itemView.findViewById<TextView>(R.id.card_and_bank_scheme)
         private var dateCreated = itemView.findViewById<TextView>(R.id.date_created)
-        private var viewTransactions = itemView.findViewById<AppCompatButton>(R.id.view_transaction_btn)
+        private var viewTransactions =
+            itemView.findViewById<AppCompatButton>(R.id.view_transaction_btn)
         private var topConstraints = itemView.findViewById<ConstraintLayout>(R.id.top_constraint)
-        private var bottomConstraint = itemView.findViewById<ConstraintLayout>(R.id.bottm_constraints)
+        private var bottomConstraint =
+            itemView.findViewById<ConstraintLayout>(R.id.bottm_constraints)
+
         @SuppressLint("SetTextI18n")
         fun bind(encryptedQrModel: EncryptedQrModel, position: Int) {
 
@@ -66,7 +72,8 @@ class TokenizedCardsAdapter(
             smallImage.setImageBitmap(qrBitmap)
             tokenizedCardImage.setImageBitmap(qrBitmap)
             bankName.text = encryptedQrModel.issuingBank
-            bankAndSchemeName.text = "${encryptedQrModel.issuingBank} ${encryptedQrModel.cardScheme}"
+            bankAndSchemeName.text =
+                "${encryptedQrModel.issuingBank} ${encryptedQrModel.cardScheme}"
             dateCreated.text = encryptedQrModel.date
 
             dropDownIcon.setOnClickListener {
@@ -96,7 +103,7 @@ class TokenizedCardsAdapter(
         }
     }
 
-    interface Interaction{
+    interface Interaction {
         fun onItemSelected(
             absoluteAdapterPosition: Int,
             encryptedQrModel: EncryptedQrModel

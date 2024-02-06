@@ -240,9 +240,9 @@ class CardsFragment : Fragment() {
                 }
 
                 override fun failed(message: String?) {
-                   progressDialogUtil.showProgressDialog(message.toString())
+                    progressDialogUtil.showProgressDialog(message.toString())
                     Handler(Looper.getMainLooper()).postDelayed({
-                       progressDialogUtil.dismissProgressDialog()
+                        progressDialogUtil.dismissProgressDialog()
                     }, 2000)
                 }
             })
@@ -258,7 +258,7 @@ class CardsFragment : Fragment() {
             object : TallyResponseCallback<StoreTokenizedCardsResponse> {
                 override fun success(data: StoreTokenizedCardsResponse?) {
                     Handler(Looper.getMainLooper()).postDelayed({
-                       progressDialogUtil.dismissProgressDialog()
+                        progressDialogUtil.dismissProgressDialog()
                     }, 2000)
                 }
 
@@ -273,7 +273,8 @@ class CardsFragment : Fragment() {
 
     private fun encryptQrToken(data: GenerateQrcodeResponse?) {
         if (data != null) {
-            Toast.makeText(requireContext(), "Card tokenization complete", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Card tokenization complete", Toast.LENGTH_SHORT)
+                .show()
             val encryptedQrModel = EncryptedQrModel(
                 qrcodeId = data.qr_code_id,
                 image = encryptBase64(data.data.toString(), data.qr_code_id.toString()),
