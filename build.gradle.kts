@@ -5,6 +5,10 @@ buildscript {
         mavenLocal()
         mavenCentral { uri("https://jitpack.io") }
     }
+
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.2.0")
+    }
 }
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
