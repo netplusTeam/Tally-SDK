@@ -11,6 +11,7 @@ import com.google.gson.reflect.TypeToken
 import com.netplus.coremechanism.backendRemote.model.qr.EncryptedQrModel
 import java.nio.charset.StandardCharsets
 
+
 object TallSecurityUtil {
 
     private const val KEYSTORE_PROVIDER = "AndroidKeyStore"
