@@ -1,5 +1,9 @@
 @file:OptIn(DelicateCoroutinesApi::class)
 
+/**
+ * A utility file containing functions related to various operations such as validation, formatting,
+ * encryption, decryption, and UI manipulation in an Android application context.
+ */
 package com.netplus.coremechanism.utils
 
 import android.app.Activity
@@ -39,6 +43,13 @@ import javax.crypto.spec.SecretKeySpec
 
 val listOfCardSchemes = listOf("Visa", "MasterCard", "American Express", "Discover", "Verve")
 
+/**
+ * Checks if the given card number is valid for the specified card type.
+ *
+ * @param cardNumber The card number as a String.
+ * @param cardType The type of the card (e.g., Visa, MasterCard).
+ * @return Boolean indicating whether the card number is valid for the given card type.
+ */
 fun isValidCardNumber(cardNumber: String, cardType: String): Boolean {
     val lengthMap = mapOf(
         "Visa" to setOf(13, 16),
@@ -51,6 +62,12 @@ fun isValidCardNumber(cardNumber: String, cardType: String): Boolean {
     return lengthMap[cardType]?.contains(cardNumber.length) == true
 }
 
+/**
+ * Determines the card scheme based on the given card number.
+ *
+ * @param cardNumber The card number as a String.
+ * @return The card scheme as a String (e.g., Visa, MasterCard, American Express, Discover, Verve).
+ */
 fun getCardScheme(cardNumber: String): String {
     val visaPattern = "^4[0-9]{6,}$"
     val mastercardPattern = "^5[1-5][0-9]{5,}$"
@@ -75,6 +92,12 @@ fun getCardScheme(cardNumber: String): String {
     return "Unknown"
 }
 
+/**
+ * Determines the card type based on the given card number.
+ *
+ * @param cardNumber The card number as a String.
+ * @return The card type as a String (e.g., Visa, MasterCard, American Express, Discover, Verve).
+ */
 fun getCardType(cardNumber: String): String {
     return if (Pattern.matches("^4[0-9]{6,}$", cardNumber)) {
         "Visa"
@@ -91,6 +114,12 @@ fun getCardType(cardNumber: String): String {
     }
 }
 
+/**
+ * Formats the given card number by inserting hyphens at specific intervals.
+ *
+ * @param cardNumber The card number as a String.
+ * @return The formatted card number as a String.
+ */
 fun formatCardNumber(cardNumber: String): String {
     val spaceIndices = calculateSpaceIndices(cardNumber.length)
     val formattedCardNumber = StringBuilder()
@@ -105,6 +134,12 @@ fun formatCardNumber(cardNumber: String): String {
     return formattedCardNumber.toString()
 }
 
+/**
+ * Calculates the indices where spaces should be inserted in a card number.
+ *
+ * @param cardNumberLength The length of the card number.
+ * @return A List of Integers indicating the indices for space insertion.
+ */
 fun calculateSpaceIndices(cardNumberLength: Int): List<Int> {
     val spaceIndices = mutableListOf<Int>()
 
@@ -116,6 +151,13 @@ fun calculateSpaceIndices(cardNumberLength: Int): List<Int> {
     return spaceIndices
 }
 
+/**
+ * Validates if the given expiry date is not in the past.
+ *
+ * @param month The expiry month as an Integer.
+ * @param year The expiry year as an Integer (last two digits).
+ * @return Boolean indicating whether the expiry date is valid (not in the past).
+ */
 fun isValidExpiryDate(month: Int, year: Int): Boolean {
     val currentDate = Calendar.getInstance()
     val currentYear =
@@ -125,18 +167,33 @@ fun isValidExpiryDate(month: Int, year: Int): Boolean {
     return year > currentYear || (year == currentYear && month >= currentMonth)
 }
 
+/**
+ * Sets the visibility of the View to VISIBLE.
+ */
 fun View.visible() {
     this.visibility = View.VISIBLE
 }
 
+/**
+ * Sets the visibility of the View to INVISIBLE.
+ */
 fun View.invisible() {
     this.visibility = View.INVISIBLE
 }
 
+/**
+ * Sets the visibility of the View to GONE.
+ */
 fun View.gone() {
     this.visibility = View.GONE
 }
 
+/**
+ * Sets a text changed listener and an editor action listener on the given AppCompatEditText to move focus to the next EditText.
+ *
+ * @param editText The current AppCompatEditText.
+ * @param nextEditText The next AppCompatEditText to focus on. Nullable if it's the last one.
+ */
 fun setEditTextListener(editText: AppCompatEditText, nextEditText: AppCompatEditText?) {
     editText.addTextChangedListener(object : TextWatcher {
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -159,6 +216,12 @@ fun setEditTextListener(editText: AppCompatEditText, nextEditText: AppCompatEdit
     }
 }
 
+/**
+ * Converts a Base64 encoded string to a Bitmap image.
+ *
+ * @param base64String The Base64 encoded string.
+ * @return The decoded Bitmap image.
+ */
 fun decodeBase64ToBitmap(base64String: String): Bitmap? {
     try {
         val byteData = Base64.decode(base64String, Base64.DEFAULT)
